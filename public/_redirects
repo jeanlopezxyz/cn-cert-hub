@@ -1,0 +1,4 @@
+# Netlify redirects - Force HTTPS
+http://cncerthub.xyz/* https://cncerthub.xyz/:splat 301!
+http://www.cncerthub.xyz/* https://cncerthub.xyz/:splat 301!
+https://www.cncerthub.xyz/* https://cncerthub.xyz/:splat 301!

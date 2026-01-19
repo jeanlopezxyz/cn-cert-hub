@@ -1,0 +1,634 @@
+@import './design-tokens.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Global Styles - Application-specific styles
+ *
+ * Note: Font definitions, typography tokens, and design tokens
+ * are defined in design-tokens.css to avoid duplication.
+ */
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 6rem;
+  }
+
+  /* Light mode (default) - Gray background for main content to differentiate from sidebar */
+  html,
+  html.light,
+  html.light body {
+    @apply bg-neutral-200 text-neutral-900;
+  }
+
+  /* Dark mode - Slightly lighter main content area for contrast with sidebar/header */
+  html.dark,
+  html.dark body {
+    @apply bg-neutral-800 text-neutral-100;
+  }
+
+  /* Ensure html has background during view transitions */
+  html {
+    background-color: var(--color-neutral-200);
+  }
+  html.dark {
+    background-color: var(--color-neutral-800);
+  }
+
+  body {
+    @apply antialiased;
+    min-height: 100vh;
+  }
+
+  /* Global focus-visible styles for accessibility */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [role='button']:focus-visible,
+  [tabindex]:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary-500;
+    outline-style: solid;
+  }
+
+  /* High contrast focus for dark mode */
+  html.dark a:focus-visible,
+  html.dark button:focus-visible,
+  html.dark input:focus-visible,
+  html.dark select:focus-visible,
+  html.dark textarea:focus-visible,
+  html.dark [role='button']:focus-visible,
+  html.dark [tabindex]:focus-visible {
+    @apply outline-primary-400;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  /* Headings use display font - already defined in design-tokens.css */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold tracking-tight font-display;
+  }
+
+  /* Minimalist custom scrollbar - Blue theme */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-blue-600/30 rounded-full;
+    border: none;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-blue-500/50;
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    @apply bg-blue-400/60;
+  }
+
+  /* Hide scrollbar buttons (arrows) */
+  ::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  /* Corner where scrollbars meet */
+  ::-webkit-scrollbar-corner {
+    @apply bg-transparent;
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(37, 99, 235, 0.3) transparent;
+  }
+
+  /* Sidebar scrollbar - WowDash style */
+  .sidebar-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 4px;
+  }
+
+  .sidebar-scroll:hover::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .sidebar-scroll:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Selection color */
+  ::selection {
+    @apply bg-primary-500/30;
+  }
+
+  /* Mobile sidebar visibility - controlled by body class */
+  body.mobile-sidebar-open .mobile-sidebar {
+    left: 0 !important;
+  }
+
+  body.mobile-sidebar-open .mobile-backdrop {
+    @apply bg-black/60 backdrop-blur-sm visible;
+  }
+
+  /* Faster mobile sidebar transition */
+  @media (max-width: 1024px) {
+    .mobile-sidebar {
+      transition: left 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .mobile-backdrop {
+      transition:
+        background-color 0.15s ease-out,
+        backdrop-filter 0.15s ease-out,
+        visibility 0s !important;
+    }
+  }
+
+  html.light ::selection {
+    @apply text-neutral-900;
+  }
+
+  html.dark ::selection {
+    @apply text-white;
+  }
+
+  /* Performance optimizations for animations */
+  .animate-fade-in,
+  .animate-fade-in-up,
+  .animate-fade-in-left,
+  .animate-scale-in {
+    contain: layout style paint;
+  }
+
+  /* Respect user's motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in-up,
+    .animate-fade-in,
+    .animate-scale-in,
+    .animate-slide-in-left {
+      animation-duration: 0.01s !important;
+      animation-delay: 0s !important;
+    }
+
+    * {
+      animation-duration: 0.01s !important;
+      animation-delay: 0s !important;
+      transition-duration: 0.01s !important;
+      transition-delay: 0s !important;
+    }
+  }
+}
+
+@layer components {
+  /* Sidebar Section Open States - Subtle styling */
+  .sidebar-section-open {
+    @apply bg-slate-100 dark:bg-neutral-800 text-neutral-900 dark:text-white;
+  }
+
+  .sidebar-section-open:hover {
+    @apply bg-slate-200 dark:bg-neutral-700;
+  }
+
+  .sidebar-icon-open {
+    @apply bg-primary-100 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400;
+  }
+
+  .sidebar-chevron-open {
+    @apply bg-slate-200 dark:bg-neutral-700 text-primary-600 dark:text-primary-400;
+  }
+
+  /* WowDash-style Card Component - Optimized transitions */
+  .card {
+    @apply bg-white dark:bg-neutral-700 shadow-sm;
+    transition: box-shadow 0.15s ease-out;
+  }
+
+  .card:hover {
+    @apply shadow-md;
+  }
+
+  .card-body {
+    @apply flex flex-col;
+  }
+
+  .card-title {
+    @apply text-neutral-900 dark:text-neutral-100;
+  }
+
+  .card-text {
+    @apply text-neutral-600 dark:text-neutral-400;
+  }
+
+  /* Faster transitions on mobile for snappier feel */
+  @media (max-width: 640px) {
+    .card {
+      transition: box-shadow 0.1s ease-out;
+    }
+  }
+}
+
+@layer utilities {
+  /* Text gradient animation */
+  @keyframes gradient {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient 8s ease infinite;
+  }
+
+  /* Blob animation for mesh gradient */
+  @keyframes blob {
+    0%,
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+  }
+
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
+  /* Shimmer slide animation for loading bar (translateX based) */
+  @keyframes shimmer-slide {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  .animate-shimmer-slide {
+    animation: shimmer-slide 1.5s infinite;
+  }
+
+  /* Skeleton loader utilities */
+  .skeleton {
+    @apply relative overflow-hidden bg-neutral-200 dark:bg-neutral-700 rounded;
+  }
+
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 1.5s infinite;
+  }
+
+  .skeleton-text {
+    @apply skeleton h-4 w-full;
+  }
+
+  .skeleton-title {
+    @apply skeleton h-6 w-3/4;
+  }
+
+  .skeleton-card {
+    @apply skeleton h-32 w-full rounded-xl;
+  }
+
+  .skeleton-avatar {
+    @apply skeleton h-10 w-10 rounded-full;
+  }
+
+  /* Grid pattern background */
+  .bg-grid-pattern {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Glow effect */
+  .glow {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+  }
+
+  /* Backdrop blur fallback */
+  @supports not (backdrop-filter: blur(12px)) {
+    .backdrop-blur-xl {
+      background-color: rgba(17, 24, 39, 0.95);
+    }
+  }
+
+  /* Disable backdrop-filter in Firefox to avoid APZ scroll-linked warnings */
+  html.no-backdrop-filter .backdrop-blur-xl,
+  html.no-backdrop-filter .backdrop-blur-sm,
+  html.no-backdrop-filter [class*='backdrop-blur-'] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* 3D Card Flip Support */
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  /* Custom scrollbar for specific areas */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-blue-500/40 rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-blue-400/60;
+  }
+
+  /* View Transitions - moved to end of file for higher specificity */
+
+  /* Fade in up animation - Optimized for mobile */
+  @keyframes fade-in-up {
+    0% {
+      opacity: 0;
+      transform: translate3d(0, 12px, 0);
+    }
+    100% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    backface-visibility: hidden;
+    will-change: opacity, transform;
+  }
+
+  /* Fade in animation */
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out forwards;
+    will-change: opacity;
+  }
+
+  /* Scale in animation - Optimized */
+  @keyframes scale-in {
+    0% {
+      opacity: 0;
+      transform: scale3d(0.95, 0.95, 1);
+    }
+    100% {
+      opacity: 1;
+      transform: scale3d(1, 1, 1);
+    }
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    backface-visibility: hidden;
+    will-change: opacity, transform;
+  }
+
+  /* Slide in from left animation - Optimized */
+  @keyframes slide-in-left {
+    0% {
+      opacity: 0;
+      transform: translate3d(-12px, 0, 0);
+    }
+    100% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  .animate-slide-in-left {
+    animation: slide-in-left 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    backface-visibility: hidden;
+    will-change: opacity, transform;
+  }
+
+  /* Content visibility for performance - defer off-screen content rendering */
+  .content-visibility-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
+  }
+
+  /* 3D rotation utilities */
+  .rotate-y-0 {
+    transform: rotateY(0deg);
+  }
+
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+
+  /* Hover scale effects */
+  .hover-scale:hover {
+    transform: scale(1.02);
+  }
+
+  .hover-scale-small:hover {
+    transform: scale(1.05);
+  }
+
+  /* Custom transition timings */
+  .transition-slow {
+    transition-duration: 0.7s;
+  }
+
+  .transition-very-slow {
+    transition-duration: 1s;
+  }
+
+  /* Smooth reveal on scroll */
+  @keyframes reveal-up {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .reveal-on-scroll {
+    animation: reveal-up 0.6s ease-out forwards;
+  }
+
+  /* Note: float and shimmer animations are defined in design-tokens.css to avoid duplication */
+
+  /* Subtle parallax effect */
+  .parallax-slow {
+    transform: translateZ(0);
+  }
+
+  /* Card hover lift - faster transitions */
+  .card-lift {
+    transition:
+      transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card-lift:hover {
+    transform: translateY(-4px) scale(1.01);
+  }
+
+  /* Disable hover effects on touch devices for better performance */
+  @media (hover: none) {
+    .card-lift:hover {
+      transform: none;
+    }
+
+    .card:hover {
+      box-shadow: inherit;
+    }
+  }
+
+  /* Theme color transitions - only on theme toggle, not navigation */
+  /* Using a very fast transition to make theme switching feel instant but smooth */
+  html.theme-transition,
+  html.theme-transition *,
+  html.theme-transition *::before,
+  html.theme-transition *::after {
+    transition:
+      background-color 0.1s ease-out,
+      border-color 0.1s ease-out,
+      color 0.1s ease-out !important;
+  }
+
+  /* Smooth backdrop filter transitions */
+  .smooth-backdrop {
+    transition: backdrop-filter 0.3s ease;
+  }
+
+  /* Progressive image loading - images visible by default */
+  img {
+    transition: opacity 0.3s ease-in;
+    opacity: 1;
+  }
+}
+
+/**
+ * View Transitions Override - MUST be outside @layer for highest specificity
+ * This completely disables Astro's default view transition animations
+ * to prevent the white flash when navigating between pages
+ */
+::view-transition-group(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+}
+
+::view-transition-old(root) {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+::view-transition-new(root) {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+/* Set background color during view transition to match theme */
+/* Must match bg-neutral-800 (dark) and bg-neutral-200 (light) from body */
+::view-transition,
+::view-transition-group(root),
+::view-transition-image-pair(root) {
+  background-color: var(--color-neutral-800) !important;
+}
+
+html:not(.dark) ::view-transition,
+html:not(.dark) ::view-transition-group(root),
+html:not(.dark) ::view-transition-image-pair(root),
+html.light ::view-transition,
+html.light ::view-transition-group(root),
+html.light ::view-transition-image-pair(root) {
+  background-color: var(--color-neutral-200) !important;
+}
+
+/* Sidebar and Header - never participate in page animations */
+.sidebar-persistent,
+.header-persistent {
+  view-transition-name: none !important;
+}
+
+/* Prevent fade animations on persistent elements (but allow CSS transitions for mobile menu) */
+.sidebar-persistent,
+.sidebar-persistent > *,
+.header-persistent,
+.header-persistent > * {
+  animation-name: none !important;
+}
+
+/* Hide sidebar placeholder when React sidebar is loaded */
+.sidebar-persistent:has(aside.mobile-sidebar) #sidebar-placeholder {
+  display: none !important;
+}

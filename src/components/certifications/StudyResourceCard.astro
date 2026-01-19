@@ -1,0 +1,98 @@
+---
+/**
+ * Study Resource Card Component
+ * Displays a single study resource with title, author, description, and badges
+ */
+import type { StudyResource } from '@/types';
+import { getDifficultyClass, getPaidStatusClass } from '@/utils';
+import Icon from '@/components/ui/Icon.astro';
+
+interface Props {
+  resource: StudyResource;
+  translations: {
+    by: string;
+    free: string;
+    paid: string;
+    beginner: string;
+    intermediate: string;
+    advanced: string;
+  };
+}
+
+const { resource, translations } = Astro.props;
+
+const difficultyLabel =
+  resource.difficulty === 'beginner'
+    ? translations.beginner
+    : resource.difficulty === 'intermediate'
+      ? translations.intermediate
+      : translations.advanced;
+---
+
+<a
+  href={resource.url}
+  target="_blank"
+  rel="noopener noreferrer"
+  class="group block p-4 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700/80 rounded-xl border border-neutral-200 dark:border-neutral-700 hover:border-primary-300 dark:hover:border-primary-600 shadow-sm hover:shadow-md transition-all duration-200"
+>
+  <div class="flex items-start justify-between gap-4">
+    <div class="flex-1 min-w-0">
+      <h5
+        class="text-base font-bold text-neutral-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors"
+      >
+        {resource.title}
+      </h5>
+      {
+        resource.author && (
+          <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+            {translations.by} {resource.author}
+          </p>
+        )
+      }
+      {
+        resource.description && (
+          <p class="text-sm text-neutral-600 dark:text-neutral-300 mt-2 line-clamp-2">
+            {resource.description}
+          </p>
+        )
+      }
+    </div>
+
+    <div class="flex flex-col items-end gap-2 flex-shrink-0">
+      <div class="flex items-center gap-1.5">
+        <span
+          class={`px-2 py-1 ${getPaidStatusClass(resource.isPaid)} text-xs font-bold rounded-md uppercase tracking-wide`}
+        >
+          {resource.isPaid ? translations.paid : translations.free}
+        </span>
+        {
+          resource.difficulty && (
+            <span
+              class={`px-2 py-1 text-xs font-bold rounded-md uppercase tracking-wide ${getDifficultyClass(resource.difficulty)}`}
+            >
+              {difficultyLabel}
+            </span>
+          )
+        }
+        <div
+          class="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-neutral-700 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/50 flex items-center justify-center transition-colors"
+        >
+          <Icon
+            name="externalLink"
+            size="sm"
+            class="text-neutral-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors"
+            strokeWidth={2}
+          />
+        </div>
+      </div>
+      {
+        resource.duration && (
+          <span class="text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+            <Icon name="clock" size="sm" strokeWidth={2} />
+            {resource.duration}
+          </span>
+        )
+      }
+    </div>
+  </div>
+</a>

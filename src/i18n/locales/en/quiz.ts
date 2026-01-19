@@ -1,0 +1,77 @@
+/**
+ * EN - Quiz translations
+ *
+ * This file contains translations for: quiz
+ *
+ * To contribute translations:
+ * 1. Find the key you want to translate
+ * 2. Update the value while keeping the key unchanged
+ * 3. Run 'npm run validate' to check for errors
+ */
+
+export const quiz = {
+  'quiz.allQuestions': 'All',
+  'quiz.answerRequired': '(Answer Required)',
+  'quiz.answered': 'answered',
+  'quiz.availableQuestions': 'Available questions',
+  'quiz.checkBackLater': 'Check back later for interactive practice questions.',
+  'quiz.comingSoon': 'Practice questions for this certification are coming soon!',
+  'quiz.copied': 'Copied!',
+  'quiz.copyResult': 'Copy Image',
+  'quiz.correct': 'Correct!',
+  'quiz.correctAnswer': 'Correct answer',
+  'quiz.correctCount': 'Correct',
+  'quiz.disclaimer':
+    'These are practice questions for study purposes only. They are NOT official exam questions. Use them to assess your knowledge level and identify areas for improvement.',
+  'quiz.disclaimerShort': 'Practice questions only - not official exam content',
+  'quiz.domain': 'Domain',
+  'quiz.downloadImage': 'Download Image',
+  'quiz.duration': 'Duration',
+  'quiz.examMode': 'Exam Mode',
+  'quiz.examModeDesc': 'Simulate real exam conditions',
+  'quiz.examModeDesc1': '• Sequential questions (no going back)',
+  'quiz.examModeDesc2': '• Must answer to proceed',
+  'quiz.examModeDesc3': '• Simulates real exam conditions',
+  'quiz.examModeDesc4': '• Results shown at the end',
+  'quiz.examModeShort': 'Simulates real exam',
+  'quiz.explanation': 'Explanation',
+  'quiz.failed': 'FAILED',
+  'quiz.finish': 'Finish',
+  'quiz.finishQuiz': 'Finish Quiz',
+  'quiz.generating': 'Generating...',
+  'quiz.imageDownloaded': 'Image downloaded! Attach it to your post',
+  'quiz.incorrect': 'Incorrect',
+  'quiz.incorrectCount': 'Incorrect',
+  'quiz.min': 'min',
+  'quiz.next': 'Next',
+  'quiz.of': 'of',
+  'quiz.passed': 'PASSED',
+  'quiz.passing': 'Passing',
+  'quiz.passingScore': 'Passing Score',
+  'quiz.previous': 'Previous',
+  'quiz.progress': 'Progress',
+  'quiz.question': 'Question',
+  'quiz.questions': 'Questions',
+  'quiz.questionsAvailable': 'Questions Available',
+  'quiz.quizComplete': 'Quiz Complete!',
+  'quiz.recommended': 'Recommended',
+  'quiz.reset': 'Reset',
+  'quiz.selectQuestions': 'Number of questions',
+  'quiz.shareResult': 'Share Result',
+  'quiz.startExamMode': 'Start Exam Mode',
+  'quiz.startStudyMode': 'Start Study Mode',
+  'quiz.studyMode': 'Study Mode',
+  'quiz.studyModeDesc': 'See answers immediately and learn as you go',
+  'quiz.studyModeDesc1': '• Navigate freely between questions',
+  'quiz.studyModeDesc2': '• Immediate explanations',
+  'quiz.studyModeDesc3': '• Perfect for learning',
+  'quiz.studyModeDesc4': '• Review answers as you go',
+  'quiz.studyModeShort': 'Learn at your pace',
+  'quiz.subtitle': 'Test your knowledge with practice questions',
+  'quiz.suggestedDuration': 'Suggested Duration',
+  'quiz.takeAnother': 'Take Another Quiz',
+  'quiz.threshold': 'Threshold',
+  'quiz.timeUsed': 'Time Used',
+  'quiz.timed': 'Timed',
+  'quiz.title': 'Practice Exam Simulator',
+} as const;

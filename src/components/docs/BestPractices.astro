@@ -1,0 +1,621 @@
+---
+/**
+ * Best Practices Page Component (Astro)
+ * Displays Kubernetes best practices with priority levels and code examples
+ * Converted from React to Astro - using vanilla JavaScript for interactivity
+ */
+
+import type { Language } from '@/types';
+import { useTranslations } from '@/i18n/utils';
+import Icon from '@/components/ui/Icon.astro';
+import { BEST_PRACTICES_ICONS } from '@/utils';
+import { TOUCH_TARGET } from '@/app';
+import { MAIN_CATEGORIES, PRIORITY_CONFIG, TABS_CONFIG } from '@/data/best-practices';
+
+interface Props {
+  lang: Language;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// Pre-compute all translations for use in client-side JavaScript
+const allTranslations: Record<string, string> = {};
+
+// Add priority labels
+Object.values(PRIORITY_CONFIG).forEach((config) => {
+  allTranslations[config.labelKey] = t(config.labelKey);
+});
+
+// Add all category labels
+MAIN_CATEGORIES.forEach((cat) => {
+  allTranslations[cat.labelKey] = t(cat.labelKey);
+});
+
+// Add all tab labels
+TABS_CONFIG.forEach((tab) => {
+  allTranslations[tab.labelKey] = t(tab.labelKey);
+  tab.practices.forEach((practice) => {
+    allTranslations[practice.titleKey] = t(practice.titleKey);
+    allTranslations[practice.descKey] = t(practice.descKey);
+    practice.items.forEach((item) => {
+      allTranslations[item.titleKey] = t(item.titleKey);
+      if (item.whyItMattersKey) allTranslations[item.whyItMattersKey] = t(item.whyItMattersKey);
+      if (item.commonMistakeKey) allTranslations[item.commonMistakeKey] = t(item.commonMistakeKey);
+    });
+  });
+});
+
+const uiTranslations = {
+  copyText: t('bestPractices.ui.copy'),
+  showCode: t('bestPractices.ui.showCode'),
+  hideCode: t('bestPractices.ui.hideCode'),
+  whyMatters: t('bestPractices.ui.whyMatters'),
+  hideDetails: t('bestPractices.ui.hideDetails'),
+  whyMattersLabel: t('bestPractices.ui.whyMattersLabel'),
+  commonMistakeLabel: t('bestPractices.ui.commonMistakeLabel'),
+  selectCategory: t('bestPractices.ui.selectCategory'),
+  selectSubcategory: t('bestPractices.ui.selectSubcategory'),
+};
+
+// Icon paths for client-side rendering
+const iconPaths = {
+  chevronDown: BEST_PRACTICES_ICONS.chevronDown,
+  check: BEST_PRACTICES_ICONS.check,
+  code: BEST_PRACTICES_ICONS.code,
+  info: BEST_PRACTICES_ICONS.info,
+  copy: BEST_PRACTICES_ICONS.copy,
+};
+---
+
+<div
+  class="w-full px-4 sm:px-6 lg:px-8 xl:px-8 2xl:px-12 3xl:px-16 py-6 sm:py-8"
+  id="best-practices-root"
+>
+  <!-- Header Card -->
+  <div class="mb-6">
+    <div class="rounded-xl border-0 p-5 sm:p-6 bg-emerald-50 dark:bg-emerald-900/20">
+      <div class="flex items-start gap-4">
+        <div
+          class="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 inline-flex items-center justify-center bg-emerald-600 text-white rounded-xl"
+        >
+          <Icon name="badgeCheck" class="w-7 h-7 sm:w-8 sm:h-8" strokeWidth={1.5} />
+        </div>
+        <div class="min-w-0 flex-1">
+          <h1 class="text-2xl sm:text-3xl font-semibold text-emerald-600 dark:text-emerald-400">
+            {t('bestPractices.title')}
+          </h1>
+          <p class="text-base sm:text-lg text-neutral-600 dark:text-neutral-300 line-clamp-2">
+            {t('bestPractices.subtitle')}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <div class="sm:hidden relative">
+      <button
+        id="mobile-category-dropdown-btn"
+        class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium text-base shadow-md transition-all duration-200"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-controls="mobile-category-dropdown"
+        aria-label={t('bestPractices.ui.selectCategory')}
+      >
+        <div class="flex items-center gap-3">
+          <span class="flex-shrink-0" id="mobile-category-icon" aria-hidden="true"></span>
+          <span id="mobile-category-label"></span>
+        </div>
+        <span
+          id="mobile-dropdown-chevron"
+          class="transition-transform duration-200"
+          aria-hidden="true"
+        >
+          <Icon name="chevronDown" size="lg" strokeWidth={2} />
+        </span>
+      </button>
+      <div
+        id="mobile-category-dropdown"
+        role="listbox"
+        aria-label={t('bestPractices.ui.categories')}
+        class="hidden absolute z-50 mt-2 w-full rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-lg overflow-hidden"
+      >
+      </div>
+    </div>
+
+    <div
+      class="hidden sm:flex flex-wrap gap-2 p-2 bg-neutral-100 dark:bg-neutral-700/50 rounded-xl shadow-sm dark:shadow-none"
+      id="desktop-categories"
+      role="tablist"
+      aria-label={t('bestPractices.ui.categories')}
+    >
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <!-- Mobile Subcategory Dropdown -->
+    <div class="sm:hidden relative">
+      <button
+        id="mobile-subcategory-dropdown-btn"
+        class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-medium text-sm transition-all duration-200"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-controls="mobile-subcategory-dropdown"
+        aria-label={t('bestPractices.ui.selectSubcategory')}
+      >
+        <div class="flex items-center gap-2">
+          <Icon name="menu" size="sm" strokeWidth={2} />
+          <span id="mobile-subcategory-label"></span>
+        </div>
+        <span
+          id="mobile-subcategory-chevron"
+          class="transition-transform duration-200"
+          aria-hidden="true"
+        >
+          <Icon name="chevronDown" size="sm" strokeWidth={2} />
+        </span>
+      </button>
+      <div
+        id="mobile-subcategory-dropdown"
+        role="listbox"
+        aria-label={t('bestPractices.ui.subcategories')}
+        class="hidden absolute top-full left-0 right-0 mt-2 bg-white dark:bg-neutral-800 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-700 z-30 overflow-hidden"
+      >
+      </div>
+    </div>
+    <!-- Desktop Subcategory Pills -->
+    <div
+      id="subcategories-container"
+      role="tablist"
+      aria-label={t('bestPractices.ui.subcategories')}
+      class="hidden sm:flex gap-2 p-2 bg-neutral-100 dark:bg-neutral-700/50 rounded-xl shadow-sm dark:shadow-none flex-wrap"
+    >
+    </div>
+  </div>
+
+  <div id="tab-content-container" class="space-y-6"></div>
+</div>
+
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script
+  is:inline
+  src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+<script
+  is:inline
+  src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+<style is:global>
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Code block wrapper - Clean solid dark */
+  .code-block-wrapper {
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    border: 1px solid #374151 !important;
+    background: #111827 !important;
+  }
+
+  /* Header - solid dark */
+  .code-block-header {
+    background: #1f2937 !important;
+    border-bottom: 1px solid #374151 !important;
+    padding: 0.75rem 1rem !important;
+  }
+
+  /* Code area - solid darkest */
+  .code-block-wrapper pre,
+  .code-block-wrapper pre[class*='language-'],
+  .code-block-wrapper code,
+  .code-block-wrapper code[class*='language-'],
+  pre[class*='language-'],
+  pre[class*='language-'] code,
+  code[class*='language-'] {
+    margin: 0 !important;
+    background: #111827 !important;
+    color: #e5e7eb !important;
+    font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace !important;
+    font-size: 0.8125rem !important;
+    line-height: 1.7 !important;
+    text-shadow: none !important;
+  }
+
+  .code-block-wrapper pre,
+  .code-block-wrapper pre[class*='language-'] {
+    padding: 1.25rem !important;
+    border-radius: 0 !important;
+    overflow-x: auto !important;
+    background: #111827 !important;
+  }
+
+  /* Syntax highlighting */
+  .token.comment,
+  .token.prolog,
+  .token.doctype,
+  .token.cdata {
+    color: #6b7280 !important;
+  }
+  .token.punctuation {
+    color: #9ca3af !important;
+  }
+  .token.property,
+  .token.tag,
+  .token.boolean,
+  .token.number,
+  .token.constant,
+  .token.symbol {
+    color: #f472b6 !important;
+  }
+  .token.selector,
+  .token.attr-name,
+  .token.string,
+  .token.char,
+  .token.builtin {
+    color: #67e8f9 !important;
+  }
+  .token.operator,
+  .token.entity,
+  .token.url {
+    color: #fbbf24 !important;
+  }
+  .token.atrule,
+  .token.attr-value,
+  .token.keyword {
+    color: #a78bfa !important;
+  }
+  .token.function,
+  .token.class-name {
+    color: #4ade80 !important;
+  }
+  .token.regex,
+  .token.important,
+  .token.variable {
+    color: #fb923c !important;
+  }
+</style>
+
+<script
+  is:inline
+  define:vars={{
+    MAIN_CATEGORIES,
+    TABS_CONFIG,
+    PRIORITY_CONFIG,
+    TOUCH_TARGET,
+    allTranslations,
+    uiTranslations,
+    iconPaths,
+    lang,
+  }}
+>
+  const state = {
+    activeMainCategory: 'infrastructure',
+    activeSubCategory: 'operations',
+    expandedPractices: [],
+    expandedCode: [],
+    expandedDetails: [],
+    isDropdownOpen: false,
+    isSubcategoryDropdownOpen: false,
+  };
+
+  function getT(key) {
+    return allTranslations[key] || key;
+  }
+
+  function getPriorityLabel(priority) {
+    const config = PRIORITY_CONFIG[priority];
+    return getT(config.labelKey);
+  }
+
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function renderMobileBtn() {
+    const category = MAIN_CATEGORIES.find((c) => c.id === state.activeMainCategory);
+    if (!category) return;
+    const btn = document.getElementById('mobile-category-dropdown-btn');
+    const icon = document.getElementById('mobile-category-icon');
+    const label = document.getElementById('mobile-category-label');
+    if (btn && category) {
+      const categoryName = getT(category.labelKey);
+      btn.className = `w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-gradient-to-r ${category.color} text-white font-medium text-base shadow-md transition-all duration-200`;
+      btn.setAttribute(
+        'aria-label',
+        `${categoryName} - ${uiTranslations.selectCategory || 'Select category'}`
+      );
+      icon.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="${category.iconPath}" /></svg>`;
+      label.textContent = categoryName;
+    }
+  }
+
+  function renderMobileDropdown() {
+    const dropdown = document.getElementById('mobile-category-dropdown');
+    if (!dropdown) return;
+    dropdown.innerHTML = MAIN_CATEGORIES.map((cat) => {
+      const isActive = state.activeMainCategory === cat.id;
+      return `<button data-category-id="${cat.id}" role="option" aria-selected="${isActive}" class="mobile-category-option w-full flex items-center gap-3 px-4 py-3 text-left text-base font-medium transition-colors ${isActive ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/50'}"><span class="flex-shrink-0 ${isActive ? 'text-primary-500' : 'text-neutral-400'}" aria-hidden="true"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="${cat.iconPath}" /></svg></span><span>${getT(cat.labelKey)}</span>${isActive ? '<svg class="w-4 h-4 ml-auto text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPaths.check}" /></svg>' : ''}</button>`;
+    }).join('');
+    dropdown.querySelectorAll('.mobile-category-option').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        handleMainCategoryChange(btn.dataset.categoryId);
+        state.isDropdownOpen = false;
+        dropdown.classList.add('hidden');
+        document
+          .getElementById('mobile-category-dropdown-btn')
+          ?.setAttribute('aria-expanded', 'false');
+        document.getElementById('mobile-dropdown-chevron').classList.remove('rotate-180');
+      });
+    });
+  }
+
+  function renderDesktopCategories() {
+    const container = document.getElementById('desktop-categories');
+    if (!container) return;
+    container.innerHTML = MAIN_CATEGORIES.map((cat) => {
+      const isActive = state.activeMainCategory === cat.id;
+      return `<button data-category-id="${cat.id}" role="tab" aria-selected="${isActive}" tabindex="${isActive ? '0' : '-1'}" class="desktop-category-btn flex items-center gap-2 px-4 py-2.5 ${TOUCH_TARGET.min} rounded-lg font-medium transition-all duration-200 ${isActive ? `bg-gradient-to-r ${cat.color} text-white shadow-md` : 'bg-white dark:bg-neutral-700/50 text-neutral-600 dark:text-neutral-300 hover:bg-white/80 dark:hover:bg-neutral-700'}"><span class="flex-shrink-0" aria-hidden="true"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="${cat.iconPath}" /></svg></span><span class="text-base font-medium">${getT(cat.labelKey)}</span></button>`;
+    }).join('');
+    container.querySelectorAll('.desktop-category-btn').forEach((btn) => {
+      btn.addEventListener('click', () => handleMainCategoryChange(btn.dataset.categoryId));
+    });
+  }
+
+  function renderSubcategories() {
+    const container = document.getElementById('subcategories-container');
+    if (!container) return;
+    const currentCat = MAIN_CATEGORIES.find((c) => c.id === state.activeMainCategory);
+    if (!currentCat) return;
+    const subs = currentCat.subcategories
+      .map((id) => TABS_CONFIG.find((tab) => tab.id === id))
+      .filter(Boolean);
+    container.innerHTML = subs
+      .map((sub) => {
+        const isActive = state.activeSubCategory === sub.id;
+        return `<button data-subcategory-id="${sub.id}" role="tab" aria-selected="${isActive}" tabindex="${isActive ? '0' : '-1'}" class="subcategory-btn flex items-center gap-2 px-4 py-2.5 ${TOUCH_TARGET.min} rounded-lg font-medium text-base transition-all whitespace-nowrap flex-shrink-0 ${isActive ? 'bg-white dark:bg-neutral-900 text-primary-600 dark:text-primary-400 shadow-md' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-white/50 dark:hover:bg-neutral-700/50'}"><svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="${sub.iconPath}" /></svg><span>${getT(sub.labelKey)}</span></button>`;
+      })
+      .join('');
+    container.querySelectorAll('.subcategory-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.activeSubCategory = btn.dataset.subcategoryId;
+        renderSubcategories();
+        renderMobileSubcategoryBtn();
+        renderTabContent();
+      });
+    });
+  }
+
+  function renderMobileSubcategoryBtn() {
+    const currentCat = MAIN_CATEGORIES.find((c) => c.id === state.activeMainCategory);
+    if (!currentCat) return;
+    const currentSub = TABS_CONFIG.find((tab) => tab.id === state.activeSubCategory);
+    if (!currentSub) return;
+    const btn = document.getElementById('mobile-subcategory-dropdown-btn');
+    const label = document.getElementById('mobile-subcategory-label');
+    const subcategoryName = getT(currentSub.labelKey);
+    if (label) label.textContent = subcategoryName;
+    if (btn)
+      btn.setAttribute(
+        'aria-label',
+        `${subcategoryName} - ${uiTranslations.selectSubcategory || 'Select subcategory'}`
+      );
+  }
+
+  function renderMobileSubcategoryDropdown() {
+    const dropdown = document.getElementById('mobile-subcategory-dropdown');
+    if (!dropdown) return;
+    const currentCat = MAIN_CATEGORIES.find((c) => c.id === state.activeMainCategory);
+    if (!currentCat) return;
+    const subs = currentCat.subcategories
+      .map((id) => TABS_CONFIG.find((tab) => tab.id === id))
+      .filter(Boolean);
+    dropdown.innerHTML = subs
+      .map((sub) => {
+        const isActive = state.activeSubCategory === sub.id;
+        return `<button data-subcategory-id="${sub.id}" role="option" aria-selected="${isActive}" class="mobile-subcategory-option w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/50'}"><svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="${sub.iconPath}" /></svg><span>${getT(sub.labelKey)}</span>${isActive ? '<svg class="w-4 h-4 ml-auto text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPaths.check}" /></svg>' : ''}</button>`;
+      })
+      .join('');
+    dropdown.querySelectorAll('.mobile-subcategory-option').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.activeSubCategory = btn.dataset.subcategoryId;
+        state.isSubcategoryDropdownOpen = false;
+        dropdown.classList.add('hidden');
+        document
+          .getElementById('mobile-subcategory-dropdown-btn')
+          ?.setAttribute('aria-expanded', 'false');
+        document.getElementById('mobile-subcategory-chevron')?.classList.remove('rotate-180');
+        renderSubcategories();
+        renderMobileSubcategoryBtn();
+        renderTabContent();
+      });
+    });
+  }
+
+  function handleMobileSubcategoryDropdownClick(e) {
+    e.stopPropagation();
+    state.isSubcategoryDropdownOpen = !state.isSubcategoryDropdownOpen;
+    const dropdown = document.getElementById('mobile-subcategory-dropdown');
+    const chevron = document.getElementById('mobile-subcategory-chevron');
+    const btn = document.getElementById('mobile-subcategory-dropdown-btn');
+    if (dropdown) dropdown.classList.toggle('hidden', !state.isSubcategoryDropdownOpen);
+    if (chevron) chevron.classList.toggle('rotate-180', state.isSubcategoryDropdownOpen);
+    if (btn) btn.setAttribute('aria-expanded', state.isSubcategoryDropdownOpen.toString());
+  }
+
+  function renderTabContent() {
+    const container = document.getElementById('tab-content-container');
+    if (!container) return;
+    const currentTab = TABS_CONFIG.find((tab) => tab.id === state.activeSubCategory);
+    if (!currentTab) return;
+    // Add visually-hidden H2 for accessibility heading structure
+    const sectionHeading = `<h2 class="sr-only">${getT(currentTab.labelKey)}</h2>`;
+    container.innerHTML =
+      sectionHeading +
+      currentTab.practices
+        .map((practice) => {
+          const isExpanded = state.expandedPractices.includes(practice.id);
+          return `<div class="card rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-700/50 shadow-sm transition-all duration-300 hover:shadow-md"><button data-practice-id="${practice.id}" class="practice-toggle-btn w-full p-4 text-left transition-all duration-300" aria-expanded="${isExpanded}"><div class="flex items-center justify-between gap-4"><div class="flex items-center gap-3 flex-1"><div class="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center flex-shrink-0 ${practice.color}" aria-hidden="true"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="${practice.iconPath}" /></svg></div><div class="flex-1"><h3 class="text-base font-semibold text-neutral-800 dark:text-neutral-100">${getT(practice.titleKey)}</h3><p class="text-base text-neutral-500 dark:text-neutral-400 mt-0.5">${getT(practice.descKey)}</p></div></div><div class="p-2 rounded-lg bg-white/60 dark:bg-neutral-900/40" aria-hidden="true"><svg class="w-4 h-4 text-neutral-500 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPaths.chevronDown}" /></svg></div></div></button>${
+            isExpanded
+              ? `<div class="bg-neutral-100 dark:bg-neutral-900 p-4 rounded-b-xl"><div class="space-y-3">${practice.items
+                  .map((item) => {
+                    const isCodeExpanded = state.expandedCode.includes(item.id);
+                    const isDetailsExpanded = state.expandedDetails.includes(item.id);
+                    const priorityConfig = PRIORITY_CONFIG[item.priority];
+                    const hasDetails = item.whyItMattersKey || item.commonMistakeKey;
+                    return `<div class="rounded-xl transition-all duration-200 bg-white dark:bg-neutral-700/50 shadow-sm"><div class="p-4"><div class="flex items-start gap-3"><div class="flex-1 min-w-0"><div class="flex items-start justify-between gap-3"><p class="text-base leading-relaxed text-neutral-700 dark:text-neutral-300">${getT(item.titleKey)}</p><span class="flex-shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-base font-medium ${priorityConfig.color}"><span class="w-1.5 h-1.5 rounded-full ${priorityConfig.dot}"></span>${getPriorityLabel(item.priority)}</span></div><div class="mt-2 flex flex-wrap gap-2">${hasDetails ? `<button data-details-id="${item.id}" class="details-toggle-btn inline-flex items-center gap-1.5 text-base font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPaths.info}" /></svg>${isDetailsExpanded ? uiTranslations.hideDetails : uiTranslations.whyMatters}</button>` : ''}${item.codeExample ? `<button data-code-id="${item.id}" class="code-toggle-btn inline-flex items-center gap-1.5 text-base font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPaths.code}" /></svg>${isCodeExpanded ? uiTranslations.hideCode : uiTranslations.showCode}</button>` : ''}</div>${hasDetails && isDetailsExpanded ? `<div class="mt-3 ml-9 space-y-3">${item.whyItMattersKey ? `<div class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"><div class="flex items-start gap-2"><span class="text-blue-500 mt-0.5">💡</span><div><span class="text-base font-semibold text-blue-700 dark:text-blue-300 uppercase">${uiTranslations.whyMattersLabel}</span><p class="text-base text-blue-800 dark:text-blue-200 mt-1">${getT(item.whyItMattersKey)}</p></div></div></div>` : ''}${item.commonMistakeKey ? `<div class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"><div class="flex items-start gap-2"><span class="text-red-500 mt-0.5">⚠️</span><div><span class="text-base font-semibold text-red-700 dark:text-red-300 uppercase">${uiTranslations.commonMistakeLabel}</span><p class="text-base text-red-800 dark:text-red-200 mt-1">${getT(item.commonMistakeKey)}</p></div></div></div>` : ''}</div>` : ''}${item.codeExample && isCodeExpanded ? `<div class="mt-3"><div class="code-block-wrapper"><div class="code-block-header flex items-center justify-between px-4 py-2.5"><div class="flex items-center gap-3"><div class="flex gap-1.5"><div class="w-3 h-3 rounded-full bg-[#ff5f56]"></div><div class="w-3 h-3 rounded-full bg-[#ffbd2e]"></div><div class="w-3 h-3 rounded-full bg-[#27c93f]"></div></div><span class="text-sm text-neutral-400 ml-2 font-mono tracking-wide">YAML / Bash</span></div><button data-copy-code="${item.id}" class="copy-code-btn flex items-center gap-1.5 px-3 py-1.5 text-sm text-neutral-400 hover:text-white hover:bg-white/10 rounded-md transition-all duration-200" title="${uiTranslations.copyText}"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPaths.copy}" /></svg>${uiTranslations.copyText}</button></div><pre class="language-yaml"><code class="language-yaml">${escapeHtml(item.codeExample)}</code></pre></div></div>` : ''}</div></div></div></div>`;
+                  })
+                  .join('')}</div></div>`
+              : ''
+          }</div>`;
+        })
+        .join('');
+
+    container.querySelectorAll('.practice-toggle-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const practiceId = btn.dataset.practiceId;
+        const idx = state.expandedPractices.indexOf(practiceId);
+        if (idx > -1) state.expandedPractices.splice(idx, 1);
+        else state.expandedPractices.push(practiceId);
+        renderTabContent();
+      });
+    });
+
+    container.querySelectorAll('.code-toggle-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const codeId = btn.dataset.codeId;
+        const idx = state.expandedCode.indexOf(codeId);
+        if (idx > -1) state.expandedCode.splice(idx, 1);
+        else state.expandedCode.push(codeId);
+        renderTabContent();
+      });
+    });
+
+    container.querySelectorAll('.details-toggle-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const detailsId = btn.dataset.detailsId;
+        const idx = state.expandedDetails.indexOf(detailsId);
+        if (idx > -1) state.expandedDetails.splice(idx, 1);
+        else state.expandedDetails.push(detailsId);
+        renderTabContent();
+      });
+    });
+
+    container.querySelectorAll('.copy-code-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const itemId = btn.dataset.copyCode;
+        const item = currentTab.practices.flatMap((p) => p.items).find((i) => i.id === itemId);
+        if (item && item.codeExample) {
+          navigator.clipboard.writeText(item.codeExample);
+        }
+      });
+    });
+
+    if (window.Prism) {
+      window.Prism.highlightAll();
+    }
+  }
+
+  function handleMainCategoryChange(categoryId) {
+    state.activeMainCategory = categoryId;
+    const category = MAIN_CATEGORIES.find((c) => c.id === categoryId);
+    if (category && category.subcategories.length > 0) {
+      state.activeSubCategory = category.subcategories[0];
+    }
+    renderMobileBtn();
+    renderMobileDropdown();
+    renderDesktopCategories();
+    renderSubcategories();
+    renderMobileSubcategoryBtn();
+    renderMobileSubcategoryDropdown();
+    renderTabContent();
+  }
+
+  document.addEventListener('click', (e) => {
+    // Close main category dropdown
+    const dropdownBtn = document.getElementById('mobile-category-dropdown-btn');
+    const dropdown = document.getElementById('mobile-category-dropdown');
+    if (
+      state.isDropdownOpen &&
+      dropdown &&
+      !dropdown.contains(e.target) &&
+      !dropdownBtn?.contains(e.target)
+    ) {
+      state.isDropdownOpen = false;
+      dropdown.classList.add('hidden');
+      dropdownBtn?.setAttribute('aria-expanded', 'false');
+      document.getElementById('mobile-dropdown-chevron')?.classList.remove('rotate-180');
+    }
+    // Close subcategory dropdown
+    const subDropdownBtn = document.getElementById('mobile-subcategory-dropdown-btn');
+    const subDropdown = document.getElementById('mobile-subcategory-dropdown');
+    if (
+      state.isSubcategoryDropdownOpen &&
+      subDropdown &&
+      !subDropdown.contains(e.target) &&
+      !subDropdownBtn?.contains(e.target)
+    ) {
+      state.isSubcategoryDropdownOpen = false;
+      subDropdown.classList.add('hidden');
+      subDropdownBtn?.setAttribute('aria-expanded', 'false');
+      document.getElementById('mobile-subcategory-chevron')?.classList.remove('rotate-180');
+    }
+  });
+
+  function initBestPractices() {
+    // Reset state for fresh render
+    state.expandedPractices = [];
+    state.expandedCode = [];
+    state.expandedDetails = [];
+    state.isDropdownOpen = false;
+    state.isSubcategoryDropdownOpen = false;
+
+    // Setup mobile dropdown button listener
+    const mobileBtn = document.getElementById('mobile-category-dropdown-btn');
+    if (mobileBtn) {
+      mobileBtn.removeEventListener('click', handleMobileDropdownClick);
+      mobileBtn.addEventListener('click', handleMobileDropdownClick);
+    }
+
+    // Setup mobile subcategory dropdown button listener
+    const mobileSubBtn = document.getElementById('mobile-subcategory-dropdown-btn');
+    if (mobileSubBtn) {
+      mobileSubBtn.removeEventListener('click', handleMobileSubcategoryDropdownClick);
+      mobileSubBtn.addEventListener('click', handleMobileSubcategoryDropdownClick);
+    }
+
+    renderMobileBtn();
+    renderMobileDropdown();
+    renderDesktopCategories();
+    renderSubcategories();
+    renderMobileSubcategoryBtn();
+    renderMobileSubcategoryDropdown();
+    renderTabContent();
+  }
+
+  function handleMobileDropdownClick(e) {
+    e.stopPropagation();
+    state.isDropdownOpen = !state.isDropdownOpen;
+    const dropdown = document.getElementById('mobile-category-dropdown');
+    const chevron = document.getElementById('mobile-dropdown-chevron');
+    const btn = document.getElementById('mobile-category-dropdown-btn');
+    if (dropdown) dropdown.classList.toggle('hidden', !state.isDropdownOpen);
+    if (chevron) chevron.classList.toggle('rotate-180', state.isDropdownOpen);
+    if (btn) btn.setAttribute('aria-expanded', state.isDropdownOpen.toString());
+  }
+
+  // Initialize on page load and on Astro View Transitions navigation
+  initBestPractices();
+  document.addEventListener('astro:page-load', initBestPractices);
+</script>

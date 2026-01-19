@@ -1,0 +1,99 @@
+---
+import { getLangFromUrl, useTranslations, type Language } from '@/i18n/utils';
+import { buildLocalizedPath, getAchievementHeroColors } from '@/utils';
+import Icon from '@/components/ui/Icon.astro';
+import CardSection from '@/components/ui/CardSection.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+
+interface Props {
+  lang?: Language;
+}
+
+const { lang: propLang } = Astro.props;
+const lang = propLang || getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Use centralized achievement colors for consistency
+const cosmicColors = getAchievementHeroColors('cosmic');
+const goldenColors = getAchievementHeroColors('golden');
+
+const programs = [
+  {
+    id: 'kubestronaut',
+    title: t('achievements.kubestronaut.title'),
+    description: t('achievements.kubestronaut.description'),
+    href: buildLocalizedPath('/achievements/kubestronaut', lang),
+    gradient: cosmicColors.cardBg,
+    iconName: 'rocket' as const,
+    certCount: 5,
+  },
+  {
+    id: 'golden',
+    title: t('achievements.golden.title'),
+    description: t('achievements.golden.description'),
+    href: buildLocalizedPath('/achievements/golden-kubestronaut', lang),
+    gradient: goldenColors.cardBg,
+    iconName: 'star' as const,
+    certCount: 15,
+  },
+];
+---
+
+<section class="pb-4 sm:pb-5">
+  <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-8 2xl:px-12 3xl:px-16">
+    <CardSection id="achievements" class="scroll-section">
+      <SectionHeader
+        title={t('achievements.programs.title')}
+        subtitle={t('achievements.programs.subtitle')}
+      />
+
+      <div class="grid md:grid-cols-2 gap-4 sm:gap-6">
+        {
+          programs.map((program) => (
+            <a
+              href={program.href}
+              class={`group relative ${program.gradient} rounded-2xl p-6 overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl`}
+            >
+              {/* Decorative background pattern */}
+              <div class="absolute inset-0 opacity-10">
+                <div class="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/20" />
+                <div class="absolute -left-4 -bottom-4 w-24 h-24 rounded-full bg-white/10" />
+              </div>
+
+              <div class="relative z-10 flex flex-col h-full min-h-[140px]">
+                {/* Header with icon and badge */}
+                <div class="flex items-start justify-between mb-3">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                      <Icon name={program.iconName} size="md" class="text-white" strokeWidth={2} />
+                    </div>
+                    <h3 class="text-lg font-bold text-white">{program.title}</h3>
+                  </div>
+                  <div class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm">
+                    <span class="text-sm font-semibold text-white">{program.certCount} certs</span>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p class="text-white/90 text-sm leading-relaxed flex-1">{program.description}</p>
+
+                {/* Footer CTA */}
+                <div class="mt-4 flex justify-end">
+                  <span class="inline-flex items-center gap-1.5 text-sm font-semibold text-white group-hover:gap-2.5 transition-all">
+                    {t('certifications.card.viewDetails')}
+                    <Icon
+                      name="arrowRight"
+                      size="sm"
+                      class="transition-transform group-hover:translate-x-1"
+                      strokeWidth={2}
+                    />
+                  </span>
+                </div>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </CardSection>
+  </div>
+</section>

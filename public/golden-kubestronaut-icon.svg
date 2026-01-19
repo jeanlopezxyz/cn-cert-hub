@@ -1,0 +1,31 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <circle cx="128" cy="128" r="120" fill="#f59e0b"/>
+  
+  <!-- Helmet -->
+  <circle cx="128" cy="110" r="55" fill="white" stroke="#d97706" stroke-width="3"/>
+  
+  <!-- Helmet shine -->
+  <ellipse cx="115" cy="85" rx="18" ry="25" fill="rgba(255,255,255,0.4)"/>
+  
+  <!-- Visor -->
+  <circle cx="128" cy="110" r="40" fill="#fbbf24"/>
+  
+  <!-- Visor reflection -->
+  <ellipse cx="118" cy="95" rx="12" ry="18" fill="rgba(255,255,255,0.3)"/>
+  
+  <!-- Body -->
+  <rect x="103" y="160" width="50" height="60" rx="25" fill="white"/>
+  
+  <!-- Arms -->
+  <circle cx="85" cy="180" r="18" fill="white"/>
+  <circle cx="171" cy="180" r="18" fill="white"/>
+  
+  <!-- Control panel -->
+  <rect x="115" y="172" width="26" height="18" rx="4" fill="#d97706"/>
+  <circle cx="128" cy="181" r="3" fill="#fbbf24"/>
+  
+  <!-- Medal with star -->
+  <circle cx="128" cy="200" r="8" fill="#f59e0b"/>
+  <path d="M128 195 L130 198 L133 198 L131 200 L132 203 L128 201 L124 203 L125 200 L123 198 L126 198 Z" fill="#fbbf24"/>
+</svg>

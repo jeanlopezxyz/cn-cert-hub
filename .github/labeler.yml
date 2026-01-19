@@ -1,0 +1,52 @@
+# Labeler configuration
+# https://github.com/actions/labeler
+
+# Documentation changes
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '*.md'
+          - 'docs/**'
+
+# Content changes (questions, resources, best practices)
+content:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/data/questions/**'
+          - 'src/data/resources/**'
+          - 'src/data/best-practices/**'
+          - 'src/data/certifications/**'
+
+# Translation changes
+i18n:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/i18n/**'
+
+# Component changes
+components:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/components/**'
+
+# Configuration changes
+config:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/app/**'
+          - '*.config.*'
+          - 'tsconfig.json'
+          - 'package.json'
+
+# CI/CD changes
+ci/cd:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/workflows/**'
+
+# Test changes
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'tests/**'
+          - '*.test.ts'

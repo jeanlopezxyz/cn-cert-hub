@@ -1,0 +1,11 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { getPageI18n } from '@/i18n';
+import ProjectDocs from '@/components/docs/ProjectDocs.astro';
+
+const { lang, t } = getPageI18n(Astro.url);
+---
+
+<Layout title={t('docs.title')} description={t('meta.docs')} lang={lang} showSidebar={true}>
+  <ProjectDocs lang={lang} />
+</Layout>

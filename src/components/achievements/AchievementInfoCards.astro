@@ -1,0 +1,60 @@
+---
+/**
+ * AchievementInfoCards Component
+ * Reusable component for displaying Requirements and Benefits cards
+ * Used in both kubestronaut and golden-kubestronaut pages
+ */
+import Icon from '@/components/ui/Icon.astro';
+import { CARD_STYLES, SPACING } from '@/constants';
+
+interface Props {
+  requirementsTitle: string;
+  requirements: string[];
+  benefitsTitle: string;
+  benefits: string[];
+}
+
+const { requirementsTitle, requirements, benefitsTitle, benefits } = Astro.props;
+---
+
+<div class="grid md:grid-cols-2 gap-4 sm:gap-6 mb-8">
+  <!-- Requirements Card -->
+  <div class={`card rounded-xl overflow-hidden ${CARD_STYLES.gradient.blueWhite}`}>
+    <div class={SPACING.card}>
+      <h3 class="text-lg font-bold text-blue-600 dark:text-blue-400 mb-4 flex items-center gap-2">
+        <Icon name="checkCircle" size="md" strokeWidth={2} />
+        {requirementsTitle}
+      </h3>
+      <ul class="space-y-3">
+        {
+          requirements.map((req) => (
+            <li class="flex items-start gap-3">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+              <span class="text-neutral-700 dark:text-neutral-300">{req}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  <!-- Benefits Card -->
+  <div class={`card rounded-xl overflow-hidden ${CARD_STYLES.gradient.amberWhite}`}>
+    <div class={SPACING.card}>
+      <h3 class="text-lg font-bold text-amber-600 dark:text-amber-400 mb-4 flex items-center gap-2">
+        <Icon name="star" size="md" />
+        {benefitsTitle}
+      </h3>
+      <ul class="space-y-2.5">
+        {
+          benefits.map((benefit) => (
+            <li class="flex items-start gap-3">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 flex-shrink-0" />
+              <span class="text-neutral-700 dark:text-neutral-300">{benefit}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</div>

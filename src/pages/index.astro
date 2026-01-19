@@ -1,0 +1,22 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Hero from '@/components/layout/Hero.astro';
+import AchievementPrograms from '@/components/achievements/AchievementPrograms.astro';
+import CertificationGrid from '@/components/certifications/CertificationGrid.astro';
+import { getPageI18n } from '@/i18n';
+
+const { lang, t } = getPageI18n(Astro.url);
+---
+
+<Layout title={t('hero.title')} description={t('meta.home')} lang={lang} showSidebar={true}>
+  <div class="space-y-8">
+    <!-- Hero Section - Pure Astro, no JS hydration needed -->
+    <Hero lang={lang} />
+
+    <!-- Achievement Programs - Pure Astro, no JS needed -->
+    <AchievementPrograms lang={lang} />
+
+    <!-- Certifications Grid - Pure Astro with vanilla JS filtering -->
+    <CertificationGrid lang={lang} />
+  </div>
+</Layout>

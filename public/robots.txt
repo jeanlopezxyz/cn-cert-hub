@@ -1,0 +1,39 @@
+# Robots.txt with Security Considerations
+# This file controls how search engines crawl the site
+# and prevents access to sensitive areas
+
+User-agent: *
+Allow: /
+Allow: /es/
+Allow: /pt/
+
+# Block access to configuration and build files
+Disallow: /config/
+Disallow: /.env*
+Disallow: /.*
+Disallow: /node_modules/
+Disallow: /dist/
+Disallow: /build/
+Disallow: /src/
+Disallow: /.git/
+Disallow: /.github/
+Disallow: /scripts/
+
+# Block access to potentially sensitive files
+Disallow: /*.log
+Disallow: /*.backup
+Disallow: /*.tmp
+Disallow: /*.swp
+Disallow: /*~
+Disallow: /*.bak
+
+# Allow security and policy files
+Allow: /.well-known/
+Allow: /.well-known/security.txt
+Allow: /security.txt
+
+# Sitemap location
+Sitemap: https://cncerthub.xyz/sitemap-index.xml
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1

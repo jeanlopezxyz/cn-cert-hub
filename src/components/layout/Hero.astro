@@ -1,0 +1,101 @@
+---
+import { getLangFromUrl, useTranslations, type Language } from '@/i18n/utils';
+import { CARDS, EXTERNAL_URLS } from '@/app';
+import Icon from '@/components/ui/Icon.astro';
+import Button from '@/components/ui/Button.astro';
+
+interface Props {
+  lang?: Language;
+}
+
+const { lang: propLang } = Astro.props;
+const lang = propLang || getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<section class="py-4 sm:py-5">
+  <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-8 2xl:px-12 3xl:px-16">
+    <!-- Hero Card - WowDash Style with gradient accent -->
+    <div class={`bg-blue-50 dark:bg-neutral-800 ${CARDS.base} ${CARDS.bordered}`}>
+      <div class="flex flex-col xl:flex-row">
+        <!-- Content -->
+        <div class="flex-1 p-6 sm:p-8 lg:p-10">
+          <!-- Title -->
+          <h1
+            class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 text-primary-800 dark:text-white leading-tight text-center md:text-left"
+          >
+            {t('hero.title')}
+          </h1>
+
+          <!-- Description -->
+          <p
+            class="text-base text-primary-700 dark:text-neutral-300 leading-relaxed mb-6 max-w-2xl text-center md:text-left"
+          >
+            {t('hero.description')}
+          </p>
+
+          <!-- Buttons - Clean flat design -->
+          <div class="flex flex-col sm:flex-row gap-3">
+            <Button
+              type="button"
+              data-scroll-to="achievements"
+              variant="primary"
+              size="md"
+              class="bg-primary-800 hover:bg-primary-900 font-semibold"
+            >
+              {t('hero.cta.programs')}
+            </Button>
+            <Button
+              type="button"
+              data-scroll-to="certifications"
+              variant="primary"
+              size="md"
+              class="bg-primary-700 hover:bg-primary-800 font-semibold"
+            >
+              {t('hero.cta.certifications')}
+            </Button>
+            <Button
+              href={EXTERNAL_URLS.cncf.certifications}
+              target="_blank"
+              variant="primary"
+              size="md"
+              class="bg-primary-700 hover:bg-primary-800 font-semibold"
+            >
+              {t('hero.cta.official')}
+              <Icon name="externalLink" size="sm" />
+            </Button>
+          </div>
+        </div>
+
+        <!-- Visual Side Panel - Professional Solid Design -->
+        <div class="hidden xl:flex items-center justify-center p-10 bg-primary-600 min-w-[280px]">
+          <div class="text-center">
+            <!-- Icon -->
+            <div
+              class="mx-auto mb-5 w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20"
+            >
+              <Icon name="shield" class="w-8 h-8 text-white" strokeWidth={1.5} />
+            </div>
+
+            <!-- Text -->
+            <p class="text-white/50 text-[10px] font-semibold tracking-[0.25em] uppercase mb-1">
+              {t('hero.visual.cloudNative')}
+            </p>
+            <h2 class="text-white text-lg font-bold tracking-tight">
+              {t('hero.visual.certifications')}
+            </h2>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initScrollToButtons } from '@/utils/events';
+  import { onPageReady } from '@/scripts';
+  import { LAYOUT } from '@/app';
+
+  // Initialize scroll-to buttons with header offset
+  onPageReady(() => initScrollToButtons(LAYOUT.HEADER_HEIGHT));
+</script>

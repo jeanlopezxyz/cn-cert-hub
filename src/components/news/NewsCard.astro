@@ -1,0 +1,107 @@
+---
+/**
+ * NewsCard Component
+ * Card design matching site's certification cards style
+ * Uses reusable Badge and Icon components
+ */
+import type { NewsItem } from '@/data/news';
+import { useTranslations, type Language } from '@/i18n/utils';
+import {
+  getCategoryStyles,
+  getCategoryBadgeVariant,
+  getCategoryIconName,
+  formatDate,
+} from '@/utils';
+import { CARDS, STAGGER_DELAY } from '@/app';
+import Badge from '@/components/ui/Badge.astro';
+import Icon from '@/components/ui/Icon.astro';
+
+interface Props {
+  item: NewsItem;
+  lang: Language;
+  index?: number;
+}
+
+const { item, lang, index = 0 } = Astro.props;
+const t = useTranslations(lang);
+
+// Use centralized utilities
+const styles = getCategoryStyles(item.category);
+const badgeVariant = getCategoryBadgeVariant(item.category);
+const iconName = getCategoryIconName(item.category);
+
+const formattedDate = formatDate(item.publishedAt, lang, 'short');
+---
+
+<article
+  class="news-card group animate-fade-in-up h-full"
+  data-category={item.category}
+  style={`animation-delay: ${index * STAGGER_DELAY.MEDIUM}ms`}
+>
+  <a
+    href={item.url}
+    target="_blank"
+    rel="noopener noreferrer"
+    class={`card block h-full ${CARDS.base} border-0 ${styles.bg}`}
+  >
+    <div class="card-body p-4 sm:p-5 flex flex-col h-full">
+      <!-- Header: Badge + Date -->
+      <div class="flex items-center justify-between mb-3">
+        <Badge variant={badgeVariant} size="md" rounded="md">
+          <Icon name={iconName} size="sm" />
+          {t(`news.category.${item.category}`)}
+        </Badge>
+        <time class="text-sm text-neutral-500 dark:text-neutral-400">
+          {formattedDate}
+        </time>
+      </div>
+
+      <!-- Title -->
+      <h3 class={`text-base font-bold ${styles.text} mb-2 line-clamp-2 leading-snug`}>
+        {item.title}
+      </h3>
+
+      <!-- Description -->
+      <p
+        class="text-sm text-neutral-600 dark:text-neutral-300 line-clamp-3 leading-relaxed mb-4 flex-grow"
+      >
+        {item.description}
+      </p>
+
+      <!-- Footer: Source + Read more -->
+      <div class="flex items-center justify-between mt-auto">
+        <span class="text-sm text-neutral-500 dark:text-neutral-400 truncate max-w-[50%]">
+          {item.source}
+        </span>
+        <span class={`inline-flex items-center gap-1.5 text-sm font-medium ${styles.text}`}>
+          {t('news.readMore')}
+          <Icon name="externalLink" size="sm" />
+        </span>
+      </div>
+    </div>
+  </a>
+</article>
+
+<style>
+  /* News item transition states - used by NewsGrid.astro JavaScript */
+  .news-item {
+    transition:
+      opacity 0.3s ease-out,
+      transform 0.3s ease-out;
+  }
+
+  .news-item.hidden {
+    display: none;
+  }
+
+  .news-item.fade-out {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  .news-item.fade-in {
+    animation: fade-in-up 0.3s ease-out forwards;
+  }
+
+  /* Note: .animate-fade-in-up and @keyframes fade-in-up are defined in global.css */
+</style>

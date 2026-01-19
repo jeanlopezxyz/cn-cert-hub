@@ -1,0 +1,774 @@
+---
+import { getLangFromUrl, useTranslations, type Language } from '@/i18n/utils';
+import { CERTIFICATIONS } from '@/data/certifications';
+import {
+  CERTIFICATION_CATEGORIES,
+  ACHIEVEMENTS_ITEMS,
+  RESOURCES_ITEMS,
+  NEWS_UPDATES_ITEMS,
+  EXTERNAL_LINKS_ITEMS,
+  groupCertificationsByCategory,
+} from '@/app';
+import Icon from '@/components/ui/Icon.astro';
+import { buildLocalizedPath } from '@/utils';
+
+interface Props {
+  lang?: Language;
+}
+
+const { lang: propLang } = Astro.props;
+const lang = propLang || getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const basePath = buildLocalizedPath('', lang);
+// Normalize path: remove trailing slash for consistent comparison
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+const certificationsByCategory = groupCertificationsByCategory(CERTIFICATIONS);
+
+// Helper to check if path is active (handles trailing slashes)
+const isPathActive = (href: string) => {
+  const normalizedHref = href.replace(/\/$/, '') || '/';
+  return currentPath === normalizedHref;
+};
+---
+
+<!-- Mobile Backdrop -->
+<div
+  data-mobile-backdrop
+  class="fixed inset-0 z-30 lg:hidden transition-all duration-300 bg-transparent backdrop-blur-none invisible mobile-backdrop"
+>
+</div>
+
+<!-- Sidebar -->
+<aside
+  id="sidebar"
+  class="fixed top-0 h-screen z-40 w-[300px] lg:w-[280px] bg-white dark:bg-neutral-900 shadow-xl lg:shadow-none transition-all duration-300 ease-out -left-full lg:left-0 mobile-sidebar"
+>
+  <!-- Logo Section -->
+  <div
+    class="h-16 px-4 lg:px-5 flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 lg:border-0"
+  >
+    <a href={basePath || '/'} class="sidebar-logo flex items-center">
+      <span class="text-3xl font-bold text-neutral-900 dark:text-white">CN</span>
+      <span class="text-3xl font-bold text-primary-600">Cert</span>
+      <span class="text-3xl font-bold text-neutral-900 dark:text-white">Hub</span>
+    </a>
+
+    <!-- Mobile Close Button -->
+    <button
+      data-sidebar-close
+      class="lg:hidden p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+      aria-label="Close menu"
+    >
+      <Icon name="close" size="md" class="text-neutral-600 dark:text-neutral-400" />
+    </button>
+  </div>
+
+  <!-- Scrollable Menu Area -->
+  <div
+    class="h-[calc(100vh-64px)] overflow-y-auto overflow-x-hidden px-3 lg:px-4 py-4 lg:py-6 sidebar-scroll"
+  >
+    <nav class="space-y-1.5">
+      <!-- Achievement Programs Section -->
+      <div class="sidebar-section mb-1" data-section="achievements">
+        <button
+          type="button"
+          class="sidebar-section-toggle w-full flex items-center justify-between px-3 py-2.5 lg:py-3 rounded-xl transition-all duration-200 group text-neutral-900 dark:text-white hover:bg-slate-100 dark:hover:bg-neutral-800"
+          aria-expanded="false"
+          aria-label={`Toggle ${t('sidebar.sections.achievementPaths')} section`}
+        >
+          <div class="flex items-center gap-3">
+            <span
+              class="section-icon w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 bg-slate-200 dark:bg-neutral-700 text-neutral-900 dark:text-white group-hover:bg-primary-200 dark:group-hover:bg-primary-800"
+            >
+              <Icon name="star" size="md" strokeWidth={1.5} />
+            </span>
+            <span class="font-semibold text-sm">{t('sidebar.sections.achievementPaths')}</span>
+          </div>
+          <div
+            class="chevron-wrap w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 bg-transparent group-hover:bg-slate-200 dark:group-hover:bg-neutral-700"
+          >
+            <Icon name="chevronDown" size="sm" class="chevron transition-transform duration-200" />
+          </div>
+        </button>
+        <div
+          class="section-content grid transition-all duration-300 ease-in-out grid-rows-[0fr] opacity-0 pointer-events-none"
+        >
+          <div class="overflow-hidden">
+            <div class="pt-1.5 pl-3 lg:pl-4 space-y-0.5">
+              {
+                ACHIEVEMENTS_ITEMS.map((item) => {
+                  const href = `${basePath}/${item.href}`;
+                  const isActive = isPathActive(href);
+                  return (
+                    <a
+                      href={href}
+                      class={`sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        isActive
+                          ? 'bg-primary-600 text-white shadow-md shadow-primary-600/30'
+                          : 'text-neutral-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-neutral-700/50 hover:text-primary-600 dark:hover:text-primary-400'
+                      }`}
+                    >
+                      <span
+                        class={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-white' : 'bg-primary-500'}`}
+                      />
+                      <span>{t(item.translationKey)}</span>
+                    </a>
+                  );
+                })
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Separator -->
+      <div class="py-2 px-3"><hr class="border-neutral-200/70 dark:border-neutral-700/50" /></div>
+
+      <!-- Certifications Section -->
+      <div class="sidebar-section mb-1" data-section="certifications">
+        <button
+          type="button"
+          class="sidebar-section-toggle w-full flex items-center justify-between px-3 py-2.5 lg:py-3 rounded-xl transition-all duration-200 group text-neutral-900 dark:text-white hover:bg-slate-100 dark:hover:bg-neutral-800"
+          aria-expanded="true"
+          aria-label={`Toggle ${t('sidebar.certifications')} section`}
+        >
+          <div class="flex items-center gap-3">
+            <span
+              class="section-icon w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 bg-slate-200 dark:bg-neutral-700 text-neutral-900 dark:text-white group-hover:bg-primary-200 dark:group-hover:bg-primary-800"
+            >
+              <Icon name="certification" size="md" strokeWidth={1.5} />
+            </span>
+            <span class="font-semibold text-sm">{t('sidebar.certifications')}</span>
+          </div>
+          <div
+            class="chevron-wrap w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 bg-transparent group-hover:bg-slate-200 dark:group-hover:bg-neutral-700"
+          >
+            <Icon name="chevronDown" size="sm" class="chevron transition-transform duration-200" />
+          </div>
+        </button>
+        <div
+          class="section-content grid transition-all duration-300 ease-in-out grid-rows-[0fr] opacity-0 pointer-events-none"
+        >
+          <div class="overflow-hidden">
+            <div class="pt-1.5 pl-3 lg:pl-4 space-y-1">
+              {
+                CERTIFICATION_CATEGORIES.map((category) => {
+                  const certs = certificationsByCategory[category.key] || [];
+                  if (certs.length === 0) return null;
+                  const hasActiveChild = certs.some((cert) =>
+                    isPathActive(`${basePath}/certifications/${cert.id}`)
+                  );
+
+                  return (
+                    <div class="sidebar-category mb-0.5" data-category={category.key}>
+                      <button
+                        type="button"
+                        class={`sidebar-category-toggle w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
+                          hasActiveChild
+                            ? 'bg-neutral-100 dark:bg-neutral-800 text-primary-600 dark:text-primary-400'
+                            : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 hover:text-primary-600'
+                        }`}
+                        aria-expanded="false"
+                        aria-label={`Toggle ${category.name} category`}
+                      >
+                        <div class="flex items-center gap-2.5">
+                          <span
+                            class={`w-2 h-2 rounded-full transition-colors ${hasActiveChild ? 'bg-primary-500' : 'bg-neutral-300 dark:bg-neutral-600 group-hover:bg-primary-400'}`}
+                          />
+                          <span>{t(category.name)}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <span
+                            class={`text-xs font-semibold min-w-[20px] text-center px-1.5 py-0.5 rounded-full ${
+                              hasActiveChild
+                                ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400'
+                                : 'bg-slate-200 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400'
+                            }`}
+                          >
+                            {certs.length}
+                          </span>
+                          <Icon
+                            name="chevronDown"
+                            size="sm"
+                            class="category-chevron transition-transform duration-200"
+                          />
+                        </div>
+                      </button>
+                      <div class="category-content grid transition-all duration-300 ease-in-out grid-rows-[0fr] opacity-0 pointer-events-none">
+                        <div class="overflow-hidden">
+                          <div class="pt-1 pl-3 lg:pl-4 space-y-0.5">
+                            {certs.map((cert) => {
+                              const certHref = `${basePath}/certifications/${cert.id}`;
+                              const isActive = isPathActive(certHref);
+                              return (
+                                <a
+                                  href={certHref}
+                                  class={`sidebar-nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
+                                    isActive
+                                      ? 'bg-primary-600 text-white font-medium shadow-md shadow-primary-600/25'
+                                      : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 hover:text-primary-600 dark:hover:text-primary-400'
+                                  }`}
+                                >
+                                  <span
+                                    class={`w-1.5 h-1.5 rounded-full transition-colors ${isActive ? 'bg-white' : 'bg-neutral-400 dark:bg-neutral-500'}`}
+                                  />
+                                  <span class="flex-1 font-medium">{cert.acronym}</span>
+                                  {cert.isNew && (
+                                    <span
+                                      class={`text-xs font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider ${
+                                        isActive
+                                          ? 'bg-white/20 text-white'
+                                          : 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400'
+                                      }`}
+                                    >
+                                      {t('sidebar.new')}
+                                    </span>
+                                  )}
+                                </a>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Separator -->
+      <div class="py-2 px-3"><hr class="border-neutral-200/70 dark:border-neutral-700/50" /></div>
+
+      <!-- Resources Section -->
+      <div class="sidebar-section mb-1" data-section="resources">
+        <button
+          type="button"
+          class="sidebar-section-toggle w-full flex items-center justify-between px-3 py-2.5 lg:py-3 rounded-xl transition-all duration-200 group text-neutral-900 dark:text-white hover:bg-slate-100 dark:hover:bg-neutral-800"
+          aria-expanded="false"
+          aria-label={`Toggle ${t('sidebar.sections.resources')} section`}
+        >
+          <div class="flex items-center gap-3">
+            <span
+              class="section-icon w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 bg-slate-200 dark:bg-neutral-700 text-neutral-900 dark:text-white group-hover:bg-primary-200 dark:group-hover:bg-primary-800"
+            >
+              <Icon name="book" size="md" strokeWidth={1.5} />
+            </span>
+            <span class="font-semibold text-sm">{t('sidebar.sections.resources')}</span>
+          </div>
+          <div
+            class="chevron-wrap w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 bg-transparent group-hover:bg-slate-200 dark:group-hover:bg-neutral-700"
+          >
+            <Icon name="chevronDown" size="sm" class="chevron transition-transform duration-200" />
+          </div>
+        </button>
+        <div
+          class="section-content grid transition-all duration-300 ease-in-out grid-rows-[0fr] opacity-0 pointer-events-none"
+        >
+          <div class="overflow-hidden">
+            <div class="pt-1.5 pl-3 lg:pl-4 space-y-0.5">
+              {
+                RESOURCES_ITEMS.map((item) => {
+                  const href = `${basePath}/${item.href}`;
+                  const isActive = isPathActive(href);
+                  return (
+                    <a
+                      href={href}
+                      class={`sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        isActive
+                          ? 'bg-primary-600 text-white shadow-md shadow-primary-600/30'
+                          : 'text-neutral-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-neutral-700/50 hover:text-primary-600 dark:hover:text-primary-400'
+                      }`}
+                    >
+                      <span
+                        class={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-white' : 'bg-indigo-500'}`}
+                      />
+                      <span>{t(item.translationKey)}</span>
+                    </a>
+                  );
+                })
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Separator -->
+      <div class="py-2 px-3"><hr class="border-neutral-200/70 dark:border-neutral-700/50" /></div>
+
+      <!-- News & Updates Section -->
+      <div class="sidebar-section mb-1" data-section="news">
+        <button
+          type="button"
+          class="sidebar-section-toggle w-full flex items-center justify-between px-3 py-2.5 lg:py-3 rounded-xl transition-all duration-200 group text-neutral-900 dark:text-white hover:bg-slate-100 dark:hover:bg-neutral-800"
+          aria-expanded="false"
+          aria-label={`Toggle ${t('sidebar.sections.newsUpdates')} section`}
+        >
+          <div class="flex items-center gap-3">
+            <span
+              class="section-icon w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 bg-slate-200 dark:bg-neutral-700 text-neutral-900 dark:text-white group-hover:bg-primary-200 dark:group-hover:bg-primary-800"
+            >
+              <Icon name="newspaper" size="md" strokeWidth={1.5} />
+            </span>
+            <span class="font-semibold text-sm">{t('sidebar.sections.newsUpdates')}</span>
+          </div>
+          <div
+            class="chevron-wrap w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 bg-transparent group-hover:bg-slate-200 dark:group-hover:bg-neutral-700"
+          >
+            <Icon name="chevronDown" size="sm" class="chevron transition-transform duration-200" />
+          </div>
+        </button>
+        <div
+          class="section-content grid transition-all duration-300 ease-in-out grid-rows-[0fr] opacity-0 pointer-events-none"
+        >
+          <div class="overflow-hidden">
+            <div class="pt-1.5 pl-3 lg:pl-4 space-y-0.5">
+              {
+                NEWS_UPDATES_ITEMS.map((item) => {
+                  const href = `${basePath}/${item.href}`;
+                  const isActive = isPathActive(href);
+                  return (
+                    <a
+                      href={href}
+                      class={`sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        isActive
+                          ? 'bg-primary-600 text-white shadow-md shadow-primary-600/30'
+                          : 'text-neutral-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-neutral-700/50 hover:text-primary-600 dark:hover:text-primary-400'
+                      }`}
+                    >
+                      <span
+                        class={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-white' : 'bg-emerald-500'}`}
+                      />
+                      <span>{t(item.translationKey)}</span>
+                    </a>
+                  );
+                })
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Separator -->
+      <div class="py-2 px-3"><hr class="border-neutral-200/70 dark:border-neutral-700/50" /></div>
+
+      <!-- External Links Section -->
+      <div class="sidebar-section mb-1" data-section="external">
+        <button
+          type="button"
+          class="sidebar-section-toggle w-full flex items-center justify-between px-3 py-2.5 lg:py-3 rounded-xl transition-all duration-200 group text-neutral-900 dark:text-white hover:bg-slate-100 dark:hover:bg-neutral-800"
+          aria-expanded="false"
+          aria-label={`Toggle ${t('sidebar.sections.externalLinks')} section`}
+        >
+          <div class="flex items-center gap-3">
+            <span
+              class="section-icon w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 bg-slate-200 dark:bg-neutral-700 text-neutral-900 dark:text-white group-hover:bg-primary-200 dark:group-hover:bg-primary-800"
+            >
+              <Icon name="externalLink" size="md" strokeWidth={1.5} />
+            </span>
+            <span class="font-semibold text-sm">{t('sidebar.sections.externalLinks')}</span>
+          </div>
+          <div
+            class="chevron-wrap w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 bg-transparent group-hover:bg-slate-200 dark:group-hover:bg-neutral-700"
+          >
+            <Icon name="chevronDown" size="sm" class="chevron transition-transform duration-200" />
+          </div>
+        </button>
+        <div
+          class="section-content grid transition-all duration-300 ease-in-out grid-rows-[0fr] opacity-0 pointer-events-none"
+        >
+          <div class="overflow-hidden">
+            <div class="pt-1.5 pl-3 lg:pl-4 space-y-0.5">
+              {
+                EXTERNAL_LINKS_ITEMS.map((item) => (
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-neutral-700/50 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-200 group"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                    <span class="flex-1">{t(item.translationKey)}</span>
+                    <Icon
+                      name="externalLink"
+                      size="sm"
+                      class="opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
+                  </a>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+</aside>
+
+<script>
+  import { toggleGridContent, toggleChevronRotation } from '@/utils';
+  import { onPageReady } from '@/scripts';
+
+  function initSidebar() {
+    const DEFAULT_OPEN_SECTIONS: string[] = [];
+
+    // Get stored values
+    function getStoredValue<T>(key: string, defaultValue: T): T {
+      try {
+        const saved = localStorage.getItem(key);
+        if (saved !== null) return JSON.parse(saved);
+      } catch {}
+      return defaultValue;
+    }
+
+    function saveToStorage(key: string, value: unknown): void {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch {}
+    }
+
+    let openSections: string[] = getStoredValue('sidebarOpenSections', DEFAULT_OPEN_SECTIONS);
+    let openCategories: string[] = getStoredValue('sidebarOpenCategories', []);
+
+    function updateSectionUI(section: HTMLElement, isOpen: boolean) {
+      const toggle = section.querySelector('.sidebar-section-toggle');
+      const content = section.querySelector('.section-content');
+      const chevron = section.querySelector('.chevron');
+      const icon = section.querySelector('.section-icon');
+      const chevronWrap = section.querySelector('.chevron-wrap');
+
+      if (toggle) toggle.setAttribute('aria-expanded', String(isOpen));
+
+      toggleGridContent(content as HTMLElement | null, isOpen);
+      toggleChevronRotation(chevron as HTMLElement | null, isOpen);
+
+      if (toggle) {
+        if (isOpen) {
+          toggle.classList.add('sidebar-section-open');
+          toggle.classList.remove(
+            'text-neutral-900',
+            'dark:text-white',
+            'hover:bg-slate-100',
+            'dark:hover:bg-neutral-800'
+          );
+        } else {
+          toggle.classList.remove('sidebar-section-open');
+          toggle.classList.add(
+            'text-neutral-900',
+            'dark:text-white',
+            'hover:bg-slate-100',
+            'dark:hover:bg-neutral-800'
+          );
+        }
+      }
+
+      if (icon) {
+        if (isOpen) {
+          icon.classList.add('sidebar-icon-open');
+          icon.classList.remove(
+            'bg-slate-200',
+            'dark:bg-neutral-700',
+            'text-neutral-900',
+            'dark:text-white',
+            'group-hover:bg-primary-200',
+            'dark:group-hover:bg-primary-800'
+          );
+        } else {
+          icon.classList.remove('sidebar-icon-open');
+          icon.classList.add(
+            'bg-slate-200',
+            'dark:bg-neutral-700',
+            'text-neutral-900',
+            'dark:text-white',
+            'group-hover:bg-primary-200',
+            'dark:group-hover:bg-primary-800'
+          );
+        }
+      }
+
+      if (chevronWrap) {
+        if (isOpen) {
+          chevronWrap.classList.add('sidebar-chevron-open');
+          chevronWrap.classList.remove(
+            'bg-transparent',
+            'group-hover:bg-slate-200',
+            'dark:group-hover:bg-neutral-700'
+          );
+        } else {
+          chevronWrap.classList.remove('sidebar-chevron-open');
+          chevronWrap.classList.add(
+            'bg-transparent',
+            'group-hover:bg-slate-200',
+            'dark:group-hover:bg-neutral-700'
+          );
+        }
+      }
+    }
+
+    function updateCategoryUI(category: HTMLElement, isOpen: boolean) {
+      const toggle = category.querySelector('.sidebar-category-toggle');
+      const content = category.querySelector('.category-content');
+      const chevron = category.querySelector('.category-chevron');
+
+      if (toggle) toggle.setAttribute('aria-expanded', String(isOpen));
+
+      toggleGridContent(content as HTMLElement | null, isOpen);
+      toggleChevronRotation(chevron as HTMLElement | null, isOpen);
+    }
+
+    // Update active link styles based on current URL
+    function updateActiveLink() {
+      const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+      let activeSectionId: string | null = null;
+      let activeCategoryId: string | null = null;
+
+      // Remove active styles from all links first
+      document.querySelectorAll('.sidebar-nav-link').forEach((link) => {
+        link.classList.remove(
+          'bg-primary-600',
+          'text-white',
+          'font-medium',
+          'shadow-md',
+          'shadow-primary-600/25',
+          'shadow-primary-600/30'
+        );
+        link.classList.add(
+          'text-neutral-600',
+          'dark:text-neutral-400',
+          'hover:bg-slate-100',
+          'dark:hover:bg-neutral-700/50',
+          'hover:text-primary-600',
+          'dark:hover:text-primary-400'
+        );
+        // Update dot color
+        const dot = link.querySelector('span.rounded-full');
+        if (dot) {
+          dot.classList.remove('bg-white');
+          dot.classList.add('bg-neutral-400', 'dark:bg-neutral-500');
+        }
+      });
+
+      // Remove active styles from all category toggles first
+      document.querySelectorAll('.sidebar-category-toggle').forEach((categoryToggle) => {
+        categoryToggle.classList.remove(
+          'bg-neutral-100',
+          'dark:bg-neutral-800',
+          'text-primary-600',
+          'dark:text-primary-400'
+        );
+        categoryToggle.classList.add(
+          'text-neutral-600',
+          'dark:text-neutral-400',
+          'hover:bg-neutral-50',
+          'dark:hover:bg-neutral-800/50',
+          'hover:text-primary-600'
+        );
+        const categoryDot = categoryToggle.querySelector('span.rounded-full');
+        if (categoryDot) {
+          categoryDot.classList.remove('bg-primary-500');
+          categoryDot.classList.add(
+            'bg-neutral-300',
+            'dark:bg-neutral-600',
+            'group-hover:bg-primary-400'
+          );
+        }
+        // Reset count badge
+        const countBadge = categoryToggle.querySelector('.text-xs.font-semibold');
+        if (countBadge) {
+          countBadge.classList.remove(
+            'bg-primary-100',
+            'dark:bg-primary-900/50',
+            'text-primary-600',
+            'dark:text-primary-400'
+          );
+          countBadge.classList.add(
+            'bg-slate-200',
+            'dark:bg-neutral-700',
+            'text-neutral-500',
+            'dark:text-neutral-400'
+          );
+        }
+      });
+
+      // Find and style the active link
+      document.querySelectorAll('.sidebar-nav-link').forEach((link) => {
+        const href = link.getAttribute('href');
+        if (!href) return;
+
+        const normalizedHref = href.replace(/\/$/, '') || '/';
+        if (currentPath === normalizedHref) {
+          // Add active styles
+          link.classList.add(
+            'bg-primary-600',
+            'text-white',
+            'font-medium',
+            'shadow-md',
+            'shadow-primary-600/25'
+          );
+          link.classList.remove(
+            'text-neutral-600',
+            'dark:text-neutral-400',
+            'hover:bg-slate-100',
+            'dark:hover:bg-neutral-700/50',
+            'hover:text-primary-600',
+            'dark:hover:text-primary-400'
+          );
+          // Update dot color
+          const dot = link.querySelector('span.rounded-full');
+          if (dot) {
+            dot.classList.add('bg-white');
+            dot.classList.remove('bg-neutral-400', 'dark:bg-neutral-500');
+          }
+
+          // Track active category
+          const category = link.closest('.sidebar-category');
+          if (category) {
+            activeCategoryId = category.getAttribute('data-category');
+            // Update category toggle styling for active child
+            const categoryToggle = category.querySelector('.sidebar-category-toggle');
+            if (categoryToggle) {
+              categoryToggle.classList.add(
+                'bg-neutral-100',
+                'dark:bg-neutral-800',
+                'text-primary-600',
+                'dark:text-primary-400'
+              );
+              categoryToggle.classList.remove(
+                'text-neutral-600',
+                'dark:text-neutral-400',
+                'hover:bg-neutral-50',
+                'dark:hover:bg-neutral-800/50',
+                'hover:text-primary-600'
+              );
+              const categoryDot = categoryToggle.querySelector('span.rounded-full');
+              if (categoryDot) {
+                categoryDot.classList.add('bg-primary-500');
+                categoryDot.classList.remove(
+                  'bg-neutral-300',
+                  'dark:bg-neutral-600',
+                  'group-hover:bg-primary-400'
+                );
+              }
+              // Update count badge
+              const countBadge = categoryToggle.querySelector('.text-xs.font-semibold');
+              if (countBadge) {
+                countBadge.classList.add(
+                  'bg-primary-100',
+                  'dark:bg-primary-900/50',
+                  'text-primary-600',
+                  'dark:text-primary-400'
+                );
+                countBadge.classList.remove(
+                  'bg-slate-200',
+                  'dark:bg-neutral-700',
+                  'text-neutral-500',
+                  'dark:text-neutral-400'
+                );
+              }
+            }
+          }
+
+          // Track active section
+          const section = link.closest('.sidebar-section');
+          if (section) {
+            activeSectionId = section.getAttribute('data-section');
+          }
+        }
+      });
+
+      // Collapse all sections and categories, then expand only the active ones
+      openSections = activeSectionId ? [activeSectionId] : [];
+      openCategories = activeCategoryId ? [activeCategoryId] : [];
+
+      // Update all sections UI
+      document.querySelectorAll('.sidebar-section').forEach((section) => {
+        const sectionId = section.getAttribute('data-section');
+        updateSectionUI(section as HTMLElement, sectionId === activeSectionId);
+      });
+
+      // Update all categories UI
+      document.querySelectorAll('.sidebar-category').forEach((category) => {
+        const categoryId = category.getAttribute('data-category');
+        updateCategoryUI(category as HTMLElement, categoryId === activeCategoryId);
+      });
+    }
+
+    // Initialize sections
+    document.querySelectorAll('.sidebar-section').forEach((section) => {
+      const sectionId = section.getAttribute('data-section');
+      if (sectionId) {
+        updateSectionUI(section as HTMLElement, openSections.includes(sectionId));
+      }
+    });
+
+    // Initialize categories
+    document.querySelectorAll('.sidebar-category').forEach((category) => {
+      const categoryId = category.getAttribute('data-category');
+      if (categoryId) {
+        updateCategoryUI(category as HTMLElement, openCategories.includes(categoryId));
+      }
+    });
+
+    // Update active link and expand its parents AFTER initial UI setup
+    updateActiveLink();
+
+    // Section toggle handlers
+    document.querySelectorAll('.sidebar-section-toggle').forEach((toggle) => {
+      toggle.addEventListener('click', () => {
+        const section = toggle.closest('.sidebar-section');
+        const sectionId = section?.getAttribute('data-section');
+        if (!sectionId || !section) return;
+
+        const isOpen = openSections.includes(sectionId);
+        if (isOpen) {
+          openSections = openSections.filter((s) => s !== sectionId);
+        } else {
+          openSections = [...openSections, sectionId];
+        }
+        saveToStorage('sidebarOpenSections', openSections);
+        updateSectionUI(section as HTMLElement, !isOpen);
+      });
+    });
+
+    // Category toggle handlers
+    document.querySelectorAll('.sidebar-category-toggle').forEach((toggle) => {
+      toggle.addEventListener('click', () => {
+        const category = toggle.closest('.sidebar-category');
+        const categoryId = category?.getAttribute('data-category');
+        if (!categoryId || !category) return;
+
+        const isOpen = openCategories.includes(categoryId);
+        if (isOpen) {
+          openCategories = openCategories.filter((c) => c !== categoryId);
+        } else {
+          openCategories = [...openCategories, categoryId];
+        }
+        saveToStorage('sidebarOpenCategories', openCategories);
+        updateCategoryUI(category as HTMLElement, !isOpen);
+      });
+    });
+
+    // Logo click - collapse all
+    const logo = document.querySelector('.sidebar-logo');
+    if (logo) {
+      logo.addEventListener('click', () => {
+        openSections = [];
+        openCategories = [];
+        saveToStorage('sidebarOpenSections', openSections);
+        saveToStorage('sidebarOpenCategories', openCategories);
+        document
+          .querySelectorAll('.sidebar-section')
+          .forEach((s) => updateSectionUI(s as HTMLElement, false));
+        document
+          .querySelectorAll('.sidebar-category')
+          .forEach((c) => updateCategoryUI(c as HTMLElement, false));
+      });
+    }
+  }
+
+  // Initialize on load and after navigation
+  onPageReady(initSidebar);
+</script>

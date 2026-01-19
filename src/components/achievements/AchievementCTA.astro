@@ -1,0 +1,36 @@
+---
+import { CARDS } from '@/app';
+import Icon from '@/components/ui/Icon.astro';
+import Button from '@/components/ui/Button.astro';
+
+interface Props {
+  text: string;
+  buttonText: string;
+  href: string;
+}
+
+const { text, buttonText, href } = Astro.props;
+---
+
+<!-- WowDash Style CTA -->
+<div class={`card ${CARDS.base} border-0 bg-primary-50 dark:bg-primary-600/20 mt-6 sm:mt-8`}>
+  <div class="card-body p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div
+        class="w-10 h-10 sm:w-12 sm:h-12 inline-flex items-center justify-center bg-primary-600 text-white rounded-xl flex-shrink-0"
+      >
+        <Icon name="play" class="w-5 h-5 sm:w-6 sm:h-6" />
+      </div>
+      <p class="text-neutral-600 dark:text-neutral-300 text-base sm:text-lg">{text}</p>
+    </div>
+    <Button
+      href={href}
+      variant="primary"
+      size="md"
+      class="group shadow-sm hover:shadow-md flex-shrink-0"
+    >
+      {buttonText}
+      <Icon name="arrowRight" size="md" class="transition-transform group-hover:translate-x-1" />
+    </Button>
+  </div>
+</div>

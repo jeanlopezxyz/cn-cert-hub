@@ -1,0 +1,77 @@
+/**
+ * PT - Quiz translations
+ *
+ * This file contains translations for: quiz
+ *
+ * To contribute translations:
+ * 1. Find the key you want to translate
+ * 2. Update the value while keeping the key unchanged
+ * 3. Run 'npm run validate' to check for errors
+ */
+
+export const quiz = {
+  'quiz.allQuestions': 'Todas',
+  'quiz.answerRequired': '(Resposta Obrigatória)',
+  'quiz.answered': 'respondidas',
+  'quiz.availableQuestions': 'Questões disponíveis',
+  'quiz.checkBackLater': 'Volte mais tarde para questões de prática interativas.',
+  'quiz.comingSoon': 'Questões de prática para esta certificação estão chegando em breve!',
+  'quiz.copied': 'Copiado!',
+  'quiz.copyResult': 'Copiar Imagem',
+  'quiz.correct': 'Correto!',
+  'quiz.correctAnswer': 'Resposta correta',
+  'quiz.correctCount': 'Corretas',
+  'quiz.disclaimer':
+    'Estas são questões de prática apenas para fins de estudo. NÃO são questões oficiais do exame. Use-as para avaliar seu nível de conhecimento e identificar áreas de melhoria.',
+  'quiz.disclaimerShort': 'Apenas questões de prática - não é conteúdo oficial do exame',
+  'quiz.domain': 'Domínio',
+  'quiz.downloadImage': 'Baixar Imagem',
+  'quiz.duration': 'Duração',
+  'quiz.examMode': 'Modo Exame',
+  'quiz.examModeDesc': 'Simular condições reais de exame',
+  'quiz.examModeDesc1': '• Questões sequenciais (não é possível voltar)',
+  'quiz.examModeDesc2': '• Deve responder para prosseguir',
+  'quiz.examModeDesc3': '• Simula condições reais de exame',
+  'quiz.examModeDesc4': '• Resultados mostrados no final',
+  'quiz.examModeShort': 'Simula o exame real',
+  'quiz.explanation': 'Explicação',
+  'quiz.failed': 'REPROVADO',
+  'quiz.finish': 'Finalizar',
+  'quiz.finishQuiz': 'Finalizar Questionário',
+  'quiz.generating': 'Gerando...',
+  'quiz.imageDownloaded': 'Imagem baixada! Anexe à sua publicação',
+  'quiz.incorrect': 'Incorreto',
+  'quiz.incorrectCount': 'Incorretas',
+  'quiz.min': 'min',
+  'quiz.next': 'Próximo',
+  'quiz.of': 'de',
+  'quiz.passed': 'APROVADO',
+  'quiz.passing': 'Aprovação',
+  'quiz.passingScore': 'Pontuação de Aprovação',
+  'quiz.previous': 'Anterior',
+  'quiz.progress': 'Progresso',
+  'quiz.question': 'Questão',
+  'quiz.questions': 'Questões',
+  'quiz.questionsAvailable': 'Questões Disponíveis',
+  'quiz.quizComplete': 'Questionário Completo!',
+  'quiz.recommended': 'Recomendado',
+  'quiz.reset': 'Reiniciar',
+  'quiz.selectQuestions': 'Número de questões',
+  'quiz.shareResult': 'Compartilhar Resultado',
+  'quiz.startExamMode': 'Iniciar Modo Exame',
+  'quiz.startStudyMode': 'Iniciar Modo Estudo',
+  'quiz.studyMode': 'Modo Estudo',
+  'quiz.studyModeDesc': 'Ver respostas imediatamente e aprender enquanto avança',
+  'quiz.studyModeDesc1': '• Navegue livremente entre questões',
+  'quiz.studyModeDesc2': '• Explicações imediatas',
+  'quiz.studyModeDesc3': '• Perfeito para aprender',
+  'quiz.studyModeDesc4': '• Revise respostas durante o progresso',
+  'quiz.studyModeShort': 'Aprenda no seu ritmo',
+  'quiz.subtitle': 'Teste seus conhecimentos com questões de prática',
+  'quiz.suggestedDuration': 'Duração Sugerida',
+  'quiz.takeAnother': 'Fazer Outro Questionário',
+  'quiz.threshold': 'Limiar',
+  'quiz.timeUsed': 'Tempo Usado',
+  'quiz.timed': 'Cronometrado',
+  'quiz.title': 'Simulador de Exame de Prática',
+} as const;

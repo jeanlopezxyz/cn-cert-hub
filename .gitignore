@@ -1,0 +1,132 @@
+# Build output
+dist/
+.astro/
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+*.lnk
+
+# IDE/Editor folders
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*.swn
+*.bak
+*~
+.project
+.classpath
+.settings/
+*.code-workspace
+
+# AI Tools
+.claude/
+.cursor/
+.aider*
+.continue/
+.github/copilot-instructions.md
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+.coverage
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.parcel-cache/
+.turbo/
+tmp/
+temp/
+
+# Build tools
+.eslintcache
+.stylelintcache
+*.pid
+*.seed
+*.pid.lock
+*.tsbuildinfo
+
+# Security
+.secrets
+*.pem
+*.key
+*.crt
+*.p12
+.env.local
+.env.*.local
+
+# Debugging
+.vscode/launch.json
+.vscode/tasks.json
+debug.log
+
+# Documentation build
+docs/_build/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# Miscellaneous
+*.backup
+*.orig
+.history/
+.svn/
+.hg/
+
+# Lighthouse
+.lighthouseci/
+lighthouse-report/
+lighthouse-*.html
+lighthouse-*.json
+
+# Bundle analysis
+stats.html
+bundle-stats.json
+analyze-bundle.js
+bundle-analyzer/
+webpack-stats.json
+
+# Test artifacts
+cypress/
+cypress.json
+
+# Playwright MCP screenshots
+.playwright-mcp/
+
+# Vercel
+.vercel/
+
+# Netlify
+.netlify/

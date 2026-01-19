@@ -1,0 +1,80 @@
+---
+/**
+ * Reusable Badge Component
+ * Standardized badge styling across the application
+ *
+ * Usage:
+ *   <Badge variant="primary">New</Badge>
+ *   <Badge variant="success" size="sm">Active</Badge>
+ *   <Badge variant="neutral" rounded="full">Tag</Badge>
+ *
+ * Accessibility:
+ *   - Badges are typically decorative and supplementary
+ *   - Ensure critical information is also conveyed through text or aria-label on parent
+ */
+
+export interface Props {
+  /** Badge size variant */
+  size?: 'sm' | 'md' | 'lg';
+  /** Badge color variant */
+  variant?:
+    | 'primary'
+    | 'teal'
+    | 'amber'
+    | 'indigo'
+    | 'purple'
+    | 'slate'
+    | 'neutral'
+    | 'success'
+    | 'warning'
+    | 'error';
+  /** Border radius style */
+  rounded?: 'md' | 'lg' | 'full';
+  /** Additional CSS classes */
+  class?: string;
+}
+
+const { size = 'md', variant = 'primary', rounded = 'md', class: className = '' } = Astro.props;
+
+// Size classes
+const sizeClasses = {
+  sm: 'px-2 py-0.5 text-xs',
+  md: 'px-2.5 py-1 text-xs',
+  lg: 'px-3 py-1.5 text-sm',
+};
+
+// Rounded classes
+const roundedClasses = {
+  md: 'rounded-md',
+  lg: 'rounded-lg',
+  full: 'rounded-full',
+};
+
+// Variant classes (background + text color)
+const variantClasses = {
+  primary: 'bg-primary-600 text-white',
+  teal: 'bg-teal-600 text-white',
+  amber: 'bg-amber-500 text-white',
+  indigo: 'bg-indigo-500 text-white',
+  purple: 'bg-purple-600 text-white',
+  slate: 'bg-slate-500 text-white',
+  neutral: 'bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200',
+  success: 'bg-green-500 text-white',
+  warning: 'bg-yellow-500 text-white',
+  error: 'bg-red-500 text-white',
+};
+
+const classes = [
+  'inline-flex items-center gap-1.5 font-medium',
+  sizeClasses[size],
+  roundedClasses[rounded],
+  variantClasses[variant],
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<span class={classes}>
+  <slot />
+</span>

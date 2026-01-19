@@ -1,0 +1,240 @@
+/**
+ * CKA - Certified Kubernetes Administrator
+ * Study Resources - Updated December 2024
+ */
+
+import type { CertificationResources } from '@/types';
+import {
+  createKillerShResource,
+  createKillercodaResource,
+  createKodeKloudLabsResource,
+  createKubernetesUpAndRunningResource,
+  createTheKubernetesBookResource,
+  createDockerForBeginnersResource,
+  createKubernetesForBeginnersResource,
+  createKubernetesDocsResource,
+  createKubectlCheatSheetResource,
+  createKubernetesTasksResource,
+  createKubernetesConceptsResource,
+  createKubernetesSlackResource,
+  createKubernetesForumResource,
+  createKubernetesRedditResource,
+  createKodeKloudCommunityResource,
+  createMinikubeResource,
+  createKindResource,
+  createK9sResource,
+} from './common-resources';
+
+export const CKA_RESOURCES: CertificationResources = {
+  official: 'https://www.cncf.io/training/certification/cka/',
+  github: [
+    'https://github.com/walidshaari/Kubernetes-Certified-Administrator',
+    'https://github.com/kodekloudhub/certified-kubernetes-administrator-course',
+    'https://github.com/alijahnas/CKA-practice-exercises',
+    'https://github.com/David-VTUK/CKA-StudyGuide',
+  ],
+  practice: [
+    createKillerShResource('CKA', 'intermediate'),
+    createKillercodaResource('CKA', 'intermediate'),
+    createKodeKloudLabsResource('CKA', 'certified-kubernetes-administrator-cka', 'intermediate'),
+  ],
+
+  books: [
+    // FREE BOOKS
+    {
+      title: 'Kubernetes Networking and Security',
+      url: 'https://www.tigera.io/lp/kubernetes-networking-ebook/',
+      author: 'Alex Pollitt (Tigera CTO)',
+      description: 'FREE - Complete guide from basic networking to advanced eBPF with Calico',
+      isPaid: false,
+      format: 'ebook',
+      year: 2024,
+      difficulty: 'intermediate',
+    },
+    {
+      title: 'Kubernetes Security and Observability',
+      url: 'https://www.tigera.io/lp/kubernetes-security-and-observability-ebook/',
+      author: "Tigera / O'Reilly",
+      description: 'FREE - Modern approaches to security and observability for K8s',
+      isPaid: false,
+      format: 'ebook',
+      year: 2024,
+      difficulty: 'intermediate',
+    },
+    {
+      title: 'Kubernetes Networking and Cilium for Network Engineers',
+      url: 'https://isovalent.com/books/kubernetes-networking-and-cilium/',
+      author: 'Isovalent',
+      description: 'FREE - 56-page guide covering Kubernetes networking fundamentals',
+      isPaid: false,
+      format: 'ebook',
+      year: 2024,
+      difficulty: 'intermediate',
+    },
+    // PAID BOOKS
+    createKubernetesUpAndRunningResource('intermediate'),
+    createTheKubernetesBookResource('beginner'),
+    {
+      title: 'Kubernetes in Action, 2nd Edition',
+      url: 'https://www.manning.com/books/kubernetes-in-action-second-edition',
+      author: 'Marko Lukša, Kevin Conner',
+      description: 'Deep dive into Kubernetes internals with practical examples',
+      isPaid: true,
+      format: 'paperback',
+      year: 2026,
+      difficulty: 'advanced',
+    },
+    {
+      title: 'Certified Kubernetes Administrator (CKA) Study Guide, 2nd Edition',
+      url: 'https://www.oreilly.com/library/view/certified-kubernetes-administrator/9798341608399/',
+      author: 'Benjamin Muschko',
+      description: 'Updated for 2026 exam with CRDs, Operators, Gateway API and more',
+      isPaid: true,
+      format: 'paperback',
+      year: 2026,
+      difficulty: 'intermediate',
+    },
+  ],
+
+  courses: [
+    {
+      title: 'Kubernetes Administrator (CKA) with Practice Tests',
+      url: 'https://www.udemy.com/course/certified-kubernetes-administrator-with-practice-tests/',
+      author: 'Mumshad Mannambeth (KodeKloud)',
+      description: 'Complete CKA preparation with hands-on labs and practice tests',
+      isPaid: true,
+      duration: '17.5 hours',
+      difficulty: 'intermediate',
+      rating: 4.7,
+    },
+    {
+      title: 'Kubernetes Fundamentals (LFS258)',
+      url: 'https://training.linuxfoundation.org/training/kubernetes-fundamentals/',
+      author: 'The Linux Foundation',
+      description: 'Official Linux Foundation course for CKA preparation',
+      isPaid: true,
+      duration: '40 hours',
+      difficulty: 'intermediate',
+      rating: 4.9,
+    },
+    {
+      title: 'CKA Certification Course - KodeKloud',
+      url: 'https://kodekloud.com/courses/certified-kubernetes-administrator-cka/',
+      author: 'KodeKloud',
+      description: 'Interactive CKA course with built-in hands-on labs',
+      isPaid: true,
+      duration: '25 hours',
+      difficulty: 'intermediate',
+      rating: 4.9,
+    },
+    {
+      title: 'Introduction to Kubernetes (LFS158)',
+      url: 'https://training.linuxfoundation.org/training/introduction-to-kubernetes/',
+      author: 'The Linux Foundation',
+      description:
+        'Free introduction to Kubernetes - in-depth primer on containerized applications',
+      isPaid: false,
+      duration: '15-20 hours',
+      difficulty: 'beginner',
+      rating: 4.7,
+    },
+    {
+      title: 'Introduction to Cilium (LFS146)',
+      url: 'https://training.linuxfoundation.org/training/introduction-to-cilium-lfs146/',
+      author: 'The Linux Foundation',
+      description: 'Kubernetes networking with Cilium - essential for CKA networking topics',
+      isPaid: false,
+      duration: '10-15 hours',
+      difficulty: 'intermediate',
+      rating: 4.7,
+    },
+  ],
+
+  videos: [
+    {
+      title: 'Linux Basics for Beginners',
+      url: 'https://kodekloud.com/courses/the-linux-basics-course/',
+      author: 'KodeKloud',
+      description: 'Essential Linux fundamentals - prerequisite for CKA',
+      isPaid: true,
+      duration: '5 hours',
+      difficulty: 'beginner',
+    },
+    createDockerForBeginnersResource('Container fundamentals before diving into Kubernetes'),
+    createKubernetesForBeginnersResource('Kubernetes basics before CKA - hands-on labs included'),
+    {
+      title: 'CKA Full Course 2025',
+      url: 'https://www.youtube.com/playlist?list=PLl4APkPHzsUUOkOv3i62UidrLmSB8DcGC',
+      author: 'Tech Tutorials with Piyush',
+      description: 'Free 59-lesson CKA course based on 2025 curriculum with hands-on demos',
+      isPaid: false,
+      duration: '25+ hours',
+      difficulty: 'intermediate',
+    },
+    {
+      title: 'CKA Exam Questions & Solutions 2025',
+      url: 'https://www.youtube.com/watch?v=eGv6iPWQKyo',
+      author: 'Alta3 Research',
+      description: 'Full walkthrough of 2025 CKA exam updates and mock questions (2024)',
+      isPaid: false,
+      duration: '46 minutes',
+      difficulty: 'intermediate',
+    },
+    {
+      title: 'Kubernetes Tutorial for Beginners',
+      url: 'https://www.youtube.com/watch?v=X48VuDVv0do',
+      author: 'TechWorld with Nana',
+      description: 'Complete Kubernetes fundamentals course (2020)',
+      isPaid: false,
+      duration: '4 hours',
+      difficulty: 'beginner',
+    },
+  ],
+
+  documentation: [
+    createKubernetesDocsResource('Official Kubernetes documentation - your primary exam reference'),
+    createKubectlCheatSheetResource('Essential kubectl commands - bookmarkable during exam'),
+    createKubernetesTasksResource(),
+    createKubernetesConceptsResource(),
+  ],
+
+  blogs: [
+    {
+      title: 'CKA Exam Study Guide 2025',
+      url: 'https://devopscube.com/cka-exam-study-guide/',
+      author: 'DevOpsCube',
+      description: 'Comprehensive CKA study guide - updated for 2025 curriculum',
+      isPaid: false,
+    },
+    {
+      title: 'Kubernetes is Evolving, the CKA Exam Too',
+      url: 'https://www.cncf.io/blog/2024/09/05/kubernetes-is-evolving-the-cka-exam-too/',
+      author: 'CNCF',
+      description: 'Official CNCF announcement on CKA exam updates (November 2024)',
+      isPaid: false,
+    },
+    {
+      title: 'CKA Exam Preparation Tips',
+      url: 'https://kodekloud.com/blog/cka-exam-prep/',
+      author: 'KodeKloud',
+      description: 'Practical tips and strategies for passing the CKA exam',
+      isPaid: false,
+    },
+    {
+      title: 'Kubernetes Official Blog',
+      url: 'https://kubernetes.io/blog/',
+      author: 'Kubernetes',
+      description: 'Latest Kubernetes releases and features',
+      isPaid: false,
+    },
+  ],
+
+  communities: [
+    createKubernetesSlackResource('cka'),
+    createKubernetesForumResource(),
+    createKubernetesRedditResource('CKA'),
+    createKodeKloudCommunityResource('CKA'),
+  ],
+
+  tools: [createMinikubeResource(), createKindResource(), createK9sResource()],
+};

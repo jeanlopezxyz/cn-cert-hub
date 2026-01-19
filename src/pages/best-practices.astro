@@ -1,0 +1,16 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { getPageI18n } from '@/i18n';
+import BestPracticesContent from '@/components/docs/BestPractices.astro';
+
+const { lang, t } = getPageI18n(Astro.url);
+---
+
+<Layout
+  title={t('bestPractices.title')}
+  description={t('meta.bestPractices')}
+  lang={lang}
+  showSidebar={true}
+>
+  <BestPracticesContent lang={lang} />
+</Layout>

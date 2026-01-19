@@ -1,0 +1,1259 @@
+---
+import { useTranslations } from '@/i18n/utils';
+import type { Language } from '@/types';
+import type { QuizSimulatorProps, QuizTranslations } from '@/types/quiz';
+import { QUIZ_ICONS, SOCIAL_ICON_PATHS, ICON_BOX_PRESETS } from '@/utils';
+import { FOCUS_RING } from '@/app';
+import { DEFAULT_PASSING_SCORE, DEFAULT_QUESTION_STEP } from '@/constants/quiz';
+import Icon from '@/components/ui/Icon.astro';
+
+interface Props extends QuizSimulatorProps {
+  lang: Language;
+}
+
+const { questions, examDuration, certificationId, lang } = Astro.props;
+const t = useTranslations(lang);
+
+// Pre-compute all translation keys needed by JavaScript
+const translations: QuizTranslations = {
+  title: t('quiz.title'),
+  subtitle: t('quiz.subtitle'),
+  comingSoon: t('quiz.comingSoon'),
+  questions: t('quiz.questions'),
+  duration: t('quiz.duration'),
+  passing: t('quiz.passing'),
+  studyMode: t('quiz.studyMode'),
+  studyModeDesc: t('quiz.studyModeDesc'),
+  recommended: t('quiz.recommended'),
+  examMode: t('quiz.examMode'),
+  examModeDesc: t('quiz.examModeDesc'),
+  quizComplete: t('quiz.quizComplete'),
+  passed: t('quiz.passed'),
+  failed: t('quiz.failed'),
+  threshold: t('quiz.threshold'),
+  correctCount: t('quiz.correctCount'),
+  incorrectCount: t('quiz.incorrectCount'),
+  timeUsed: t('quiz.timeUsed'),
+  takeAnother: t('quiz.takeAnother'),
+  shareResult: t('quiz.shareResult'),
+  generating: t('quiz.generating'),
+  downloadImage: t('quiz.downloadImage'),
+  copyResult: t('quiz.copyResult'),
+  copied: t('quiz.copied'),
+  imageDownloaded: t('quiz.imageDownloaded'),
+  question: t('quiz.question'),
+  of: t('quiz.of'),
+  finish: t('quiz.finish'),
+  reset: t('quiz.reset'),
+  progress: t('quiz.progress'),
+  answered: t('quiz.answered'),
+  correct: t('quiz.correct'),
+  incorrect: t('quiz.incorrect'),
+  explanation: t('quiz.explanation'),
+  correctAnswer: t('quiz.correctAnswer'),
+  previous: t('quiz.previous'),
+  next: t('quiz.next'),
+  finishQuiz: t('quiz.finishQuiz'),
+  selectQuestions: t('quiz.selectQuestions'),
+  allQuestions: t('quiz.allQuestions'),
+  disclaimer: t('quiz.disclaimer'),
+  disclaimerShort: t('quiz.disclaimerShort'),
+};
+
+// Pre-compute question count options
+const questionCountOptions: number[] = [];
+const totalQuestions = questions.length;
+for (let i = DEFAULT_QUESTION_STEP; i < totalQuestions; i += DEFAULT_QUESTION_STEP) {
+  questionCountOptions.push(i);
+}
+if (!questionCountOptions.includes(totalQuestions)) {
+  questionCountOptions.push(totalQuestions);
+}
+
+// Icon paths for client-side JS
+const iconPaths = {
+  lightbulb: QUIZ_ICONS.lightbulb,
+  questionCircle: QUIZ_ICONS.questionCircle,
+  chevronDown: QUIZ_ICONS.chevronDown,
+  check: QUIZ_ICONS.check,
+  clock: QUIZ_ICONS.clock,
+  book: QUIZ_ICONS.book,
+  checkCircle: QUIZ_ICONS.checkCircle,
+  info: QUIZ_ICONS.info,
+  close: QUIZ_ICONS.close,
+  chevronLeft: QUIZ_ICONS.chevronLeft,
+  chevronRight: QUIZ_ICONS.chevronRight,
+  sync: QUIZ_ICONS.sync,
+  share: QUIZ_ICONS.share,
+  download: QUIZ_ICONS.download,
+  externalLink: QUIZ_ICONS.externalLink,
+  whatsapp: SOCIAL_ICON_PATHS.whatsapp,
+  linkedin: SOCIAL_ICON_PATHS.linkedin,
+  twitter: SOCIAL_ICON_PATHS.twitter,
+};
+
+// Serialize data for client-side JS
+const quizData = JSON.stringify({
+  questions,
+  examDuration,
+  certificationId,
+  lang,
+  translations,
+  iconPaths,
+  iconBoxPresets: ICON_BOX_PRESETS,
+});
+---
+
+<div class="quiz-simulator" data-quiz={quizData} data-cert-id={certificationId}>
+  {
+    questions.length === 0 ? (
+      <div class="rounded-xl bg-white dark:bg-neutral-800 overflow-hidden shadow-sm">
+        <div class="p-8 text-center">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-blue-600 flex items-center justify-center">
+            <Icon name="lightbulb" class="w-8 h-8 text-white" strokeWidth={2} />
+          </div>
+          <h5 class="text-lg font-bold text-neutral-900 dark:text-white mb-2">
+            {translations.title}
+          </h5>
+          <p class="text-neutral-600 dark:text-neutral-400 text-base">{translations.comingSoon}</p>
+        </div>
+      </div>
+    ) : (
+      <div class="quiz-container">
+        <div class="quiz-screen quiz-start" data-screen="start">
+          <div class="rounded-xl bg-white dark:bg-neutral-800 border border-blue-200 dark:border-blue-800 overflow-hidden shadow-sm">
+            <div class="p-5 sm:p-6 pb-4">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                  <Icon
+                    name="questionCircle"
+                    class="w-6 h-6 sm:w-7 sm:h-7 text-blue-600 dark:text-blue-400"
+                    strokeWidth={2}
+                  />
+                </div>
+                <div>
+                  <h5 class="font-bold text-lg text-blue-600 dark:text-blue-400">
+                    {translations.title}
+                  </h5>
+                  <p class="text-neutral-600 dark:text-neutral-400 text-base">
+                    {translations.subtitle}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="px-5 pb-5 sm:px-6 sm:pb-6 space-y-4">
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                  {t('quiz.selectQuestions')}
+                </label>
+                <div class="relative" id="question-count-dropdown">
+                  <button
+                    type="button"
+                    id="question-count-btn"
+                    class="w-full flex items-center justify-between px-4 py-3 bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-neutral-900 dark:text-white font-semibold text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                  >
+                    <span id="question-count-label">
+                      {questionCountOptions[0]} {t('quiz.questions').toLowerCase()}
+                    </span>
+                    <span id="question-count-arrow" class="transition-transform duration-200">
+                      <Icon
+                        name="chevronDown"
+                        size="lg"
+                        class="text-neutral-500 dark:text-neutral-400"
+                        strokeWidth={2}
+                      />
+                    </span>
+                  </button>
+                  <div
+                    id="question-count-panel"
+                    class="hidden absolute z-50 w-full mt-2 py-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-xl max-h-60 overflow-y-auto"
+                    role="listbox"
+                  >
+                    {questionCountOptions.map((num, idx) => {
+                      const isAll = num === totalQuestions;
+                      const label = isAll
+                        ? `${num} (${t('quiz.allQuestions')})`
+                        : `${num} ${t('quiz.questions').toLowerCase()}`;
+                      return (
+                        <button
+                          type="button"
+                          class={`question-count-option w-full px-4 py-3 text-left text-base font-medium transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/30 ${idx === 0 ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-neutral-700 dark:text-neutral-200'}`}
+                          data-value={num}
+                          data-label={label}
+                          role="option"
+                          aria-selected={idx === 0 ? 'true' : 'false'}
+                        >
+                          <div class="flex items-center justify-between">
+                            <span>{label}</span>
+                            {idx === 0 && (
+                              <span class="check-icon">
+                                <Icon
+                                  name="check"
+                                  size="lg"
+                                  class="text-blue-600 dark:text-blue-400"
+                                  strokeWidth={2}
+                                />
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                <div class="p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-center">
+                  <div class="w-9 h-9 sm:w-10 sm:h-10 mx-auto mb-2 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <Icon
+                      name="questionCircle"
+                      class="w-4 h-4 sm:w-5 sm:h-5 text-white"
+                      strokeWidth={2}
+                    />
+                  </div>
+                  <div
+                    class="text-xl sm:text-2xl font-bold text-blue-700 dark:text-blue-400"
+                    id="selected-question-count"
+                  >
+                    {questionCountOptions[0] || 10}
+                  </div>
+                  <div class="text-sm sm:text-base font-medium text-blue-600 dark:text-blue-300">
+                    {translations.questions}
+                  </div>
+                </div>
+                <div class="p-3 sm:p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl text-center">
+                  <div class="w-9 h-9 sm:w-10 sm:h-10 mx-auto mb-2 bg-amber-500 rounded-lg flex items-center justify-center">
+                    <Icon name="clock" class="w-4 h-4 sm:w-5 sm:h-5 text-white" strokeWidth={2} />
+                  </div>
+                  <div class="text-xl sm:text-2xl font-bold text-amber-700 dark:text-amber-400">
+                    {examDuration}m
+                  </div>
+                  <div class="text-sm sm:text-base font-medium text-amber-600 dark:text-amber-300">
+                    {translations.duration}
+                  </div>
+                </div>
+                <div class="p-3 sm:p-4 bg-green-50 dark:bg-green-900/20 rounded-xl text-center">
+                  <div class="w-9 h-9 sm:w-10 sm:h-10 mx-auto mb-2 bg-green-600 rounded-lg flex items-center justify-center">
+                    <Icon name="check" class="w-4 h-4 sm:w-5 sm:h-5 text-white" strokeWidth={2} />
+                  </div>
+                  <div class="text-xl sm:text-2xl font-bold text-green-700 dark:text-green-400">
+                    {DEFAULT_PASSING_SCORE}%
+                  </div>
+                  <div class="text-sm sm:text-base font-medium text-green-600 dark:text-green-300">
+                    {translations.passing}
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-2 gap-3" role="group" aria-label="Select quiz mode">
+                {/* Study Mode Card - Pastel sky/blue */}
+                <div class="relative p-4 sm:p-5 rounded-xl bg-sky-50 dark:bg-sky-900/30 overflow-hidden">
+                  {/* Decorative background */}
+                  <div class="absolute inset-0 opacity-30">
+                    <div class="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-sky-200 dark:bg-sky-700/30" />
+                    <div class="absolute -left-2 -bottom-2 w-16 h-16 rounded-full bg-sky-100 dark:bg-sky-800/30" />
+                  </div>
+
+                  <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-3">
+                      <div class="w-10 h-10 sm:w-11 sm:h-11 bg-sky-500 rounded-xl flex items-center justify-center">
+                        <Icon
+                          name="book"
+                          class="w-5 h-5 sm:w-6 sm:h-6 text-white"
+                          strokeWidth={2}
+                        />
+                      </div>
+                      <span class="px-2.5 py-1 bg-sky-500 text-white text-xs font-bold rounded-full">
+                        {translations.recommended}
+                      </span>
+                    </div>
+
+                    <h4 class="text-lg font-bold text-sky-800 dark:text-sky-200 mb-1">
+                      {translations.studyMode}
+                    </h4>
+                    <p class="text-sky-700 dark:text-sky-300 text-sm mb-4 leading-relaxed">
+                      {translations.studyModeDesc}
+                    </p>
+
+                    <button
+                      class={`quiz-start-btn w-full py-2.5 px-4 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl transition-all ${FOCUS_RING.base} focus:ring-sky-500 inline-flex items-center justify-center gap-2`}
+                      data-mode="study"
+                      aria-label="{translations.studyMode}: {translations.studyModeDesc}"
+                    >
+                      <Icon name="play" class="w-4 h-4" strokeWidth={2.5} />
+                      {t('quiz.startStudyMode')}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Exam Mode Card - Pastel indigo/blue */}
+                <div class="relative p-4 sm:p-5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 overflow-hidden">
+                  {/* Decorative background */}
+                  <div class="absolute inset-0 opacity-30">
+                    <div class="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-indigo-200 dark:bg-indigo-700/30" />
+                    <div class="absolute -left-2 -bottom-2 w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-800/30" />
+                  </div>
+
+                  <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-3">
+                      <div class="w-10 h-10 sm:w-11 sm:h-11 bg-indigo-500 rounded-xl flex items-center justify-center">
+                        <Icon
+                          name="checkCircle"
+                          class="w-5 h-5 sm:w-6 sm:h-6 text-white"
+                          strokeWidth={2}
+                        />
+                      </div>
+                      <span class="px-2.5 py-1 bg-indigo-500 text-white text-xs font-bold rounded-full">
+                        {t('quiz.timed')}
+                      </span>
+                    </div>
+
+                    <h4 class="text-lg font-bold text-indigo-800 dark:text-indigo-200 mb-1">
+                      {translations.examMode}
+                    </h4>
+                    <p class="text-indigo-700 dark:text-indigo-300 text-sm mb-4 leading-relaxed">
+                      {translations.examModeDesc}
+                    </p>
+
+                    <button
+                      class={`quiz-start-btn w-full py-2.5 px-4 bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl transition-all ${FOCUS_RING.base} focus:ring-indigo-500 inline-flex items-center justify-center gap-2`}
+                      data-mode="exam"
+                      aria-label="{translations.examMode}: {translations.examModeDesc}"
+                    >
+                      <Icon name="play" class="w-4 h-4" strokeWidth={2.5} />
+                      {t('quiz.startExamMode')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                <div class="flex items-start gap-2">
+                  <Icon
+                    name="info"
+                    size="lg"
+                    class="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5"
+                    strokeWidth={2}
+                  />
+                  <p class="text-sm text-amber-700 dark:text-amber-300">
+                    {translations.disclaimer}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="quiz-screen quiz-active hidden" data-screen="quiz" />
+
+        <div class="quiz-screen quiz-results hidden" data-screen="results" />
+      </div>
+    )
+  }
+</div>
+
+<script>
+  import { OPTIMIZED_STORAGE, generateTextBoxHTML } from '@/utils';
+  import { TOUCH_TARGET, FOCUS_RING } from '@/app';
+  import type { Question, QuizState, QuizData } from '@/types/quiz';
+  import {
+    createDefaultState,
+    loadState as loadQuizState,
+    saveState as saveQuizState,
+    clearState,
+    shuffleArray,
+    getActiveQuestions,
+    calculateScore,
+    calculateProgress,
+    countAnswered,
+    getOptionLetter,
+    generateShareText,
+    canShareFiles,
+    generateResultImage,
+    downloadImage as downloadImageUtil,
+    openSocialShare,
+  } from '@/utils/quiz';
+
+  // Parse markdown-style explanation text to HTML
+  function parseExplanation(text: string, externalLinkPath: string): string {
+    // Convert markdown links [text](url) to HTML anchor tags
+    let result = text.replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      `<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline font-medium inline-flex items-center gap-1">$1<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="${externalLinkPath}"/></svg></a>`
+    );
+    // Convert double newlines to paragraph breaks
+    result = result.replace(
+      /\n\n/g,
+      '</p><p class="mt-3 text-neutral-700 dark:text-neutral-300 text-base leading-relaxed">'
+    );
+    // Convert single newlines to line breaks
+    result = result.replace(/\n/g, '<br>');
+    return result;
+  }
+
+  class QuizSimulator {
+    private container: HTMLElement;
+    private data: QuizData;
+    private state: QuizState;
+
+    constructor(container: HTMLElement) {
+      this.container = container;
+      this.data = JSON.parse(container.dataset.quiz || '{}');
+      this.state = this.loadState();
+      this.init();
+    }
+
+    private loadState(): QuizState {
+      return loadQuizState(this.data.certificationId, this.data.questions, OPTIMIZED_STORAGE);
+    }
+
+    private saveState(): void {
+      saveQuizState(this.data.certificationId, this.state, OPTIMIZED_STORAGE);
+    }
+
+    private init(): void {
+      // Restore state if quiz was in progress
+      if (this.state.isActive) {
+        this.showQuizScreen();
+      } else if (this.state.showResults) {
+        this.showResultsScreen();
+      } else {
+        this.showStartScreen();
+      }
+
+      this.bindEvents();
+    }
+
+    private bindEvents(): void {
+      // Custom dropdown for question count
+      const dropdownBtn = this.container.querySelector('#question-count-btn');
+      const dropdownPanel = this.container.querySelector('#question-count-panel');
+      const dropdownArrow = this.container.querySelector('#question-count-arrow');
+
+      if (dropdownBtn && dropdownPanel) {
+        // Toggle dropdown
+        dropdownBtn.addEventListener('click', () => {
+          const isOpen = !dropdownPanel.classList.contains('hidden');
+          if (isOpen) {
+            dropdownPanel.classList.add('hidden');
+            dropdownArrow?.classList.remove('rotate-180');
+            dropdownBtn.setAttribute('aria-expanded', 'false');
+          } else {
+            dropdownPanel.classList.remove('hidden');
+            dropdownArrow?.classList.add('rotate-180');
+            dropdownBtn.setAttribute('aria-expanded', 'true');
+          }
+        });
+
+        // Close on click outside
+        document.addEventListener('click', (e) => {
+          if (
+            !this.container.querySelector('#question-count-dropdown')?.contains(e.target as Node)
+          ) {
+            dropdownPanel.classList.add('hidden');
+            dropdownArrow?.classList.remove('rotate-180');
+            dropdownBtn.setAttribute('aria-expanded', 'false');
+          }
+        });
+
+        // Option selection
+        this.container.querySelectorAll('.question-count-option').forEach((option) => {
+          option.addEventListener('click', (e) => {
+            const target = e.currentTarget as HTMLElement;
+            const value = parseInt(target.dataset.value || '10');
+            const label = target.dataset.label || '';
+
+            this.selectQuestionCount(value, label);
+
+            // Close dropdown
+            dropdownPanel.classList.add('hidden');
+            dropdownArrow?.classList.remove('rotate-180');
+            dropdownBtn.setAttribute('aria-expanded', 'false');
+          });
+        });
+      }
+
+      // Start buttons
+      this.container.querySelectorAll('.quiz-start-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          const mode = (e.currentTarget as HTMLElement).dataset.mode as 'exam' | 'study';
+          this.startQuiz(mode);
+        });
+      });
+    }
+
+    private selectQuestionCount(count: number, label?: string): void {
+      this.state.selectedQuestionCount = count;
+      if (label) {
+        this.updateDropdownUI(count, label);
+      }
+    }
+
+    private getActiveQuestions(): Question[] {
+      return getActiveQuestions(this.state, this.data.questions);
+    }
+
+    private showScreen(screenName: string): void {
+      this.container.querySelectorAll('.quiz-screen').forEach((screen) => {
+        screen.classList.add('hidden');
+      });
+      const target = this.container.querySelector(`[data-screen="${screenName}"]`);
+      if (target) {
+        target.classList.remove('hidden');
+      }
+    }
+
+    private showStartScreen(): void {
+      this.showScreen('start');
+      this.syncDropdownWithState();
+    }
+
+    private syncDropdownWithState(): void {
+      // Find the option that matches the current state
+      const options = this.container.querySelectorAll('.question-count-option');
+      let matchedOption: HTMLElement | null = null;
+      let firstOption: HTMLElement | null = null;
+
+      options.forEach((option, idx) => {
+        const optionEl = option as HTMLElement;
+        const value = parseInt(optionEl.dataset.value || '0');
+
+        if (idx === 0) firstOption = optionEl;
+        if (value === this.state.selectedQuestionCount) {
+          matchedOption = optionEl;
+        }
+      });
+
+      // If no match found, use first option and update state
+      const targetOption = matchedOption ?? firstOption;
+      if (targetOption) {
+        const value = parseInt((targetOption as HTMLElement).dataset.value || '10');
+        const label = (targetOption as HTMLElement).dataset.label || '';
+
+        // Update state if needed
+        if (this.state.selectedQuestionCount !== value) {
+          this.state.selectedQuestionCount = value;
+        }
+
+        // Update UI without triggering events
+        this.updateDropdownUI(value, label);
+      }
+    }
+
+    private updateDropdownUI(count: number, label: string): void {
+      // Update dropdown button label
+      const labelEl = this.container.querySelector('#question-count-label');
+      if (labelEl && label) {
+        labelEl.textContent = label;
+      }
+
+      // Update display count in stats
+      const countDisplay = this.container.querySelector('#selected-question-count');
+      if (countDisplay) {
+        countDisplay.textContent = count.toString();
+      }
+
+      // Update visual state of options
+      this.container.querySelectorAll('.question-count-option').forEach((option) => {
+        const optionValue = parseInt((option as HTMLElement).dataset.value || '0');
+        const isSelected = optionValue === count;
+
+        // Reset classes first
+        option.classList.remove(
+          'bg-blue-50',
+          'dark:bg-blue-900/30',
+          'text-blue-600',
+          'dark:text-blue-400'
+        );
+        option.classList.remove('text-neutral-700', 'dark:text-neutral-200');
+
+        // Apply correct classes
+        if (isSelected) {
+          option.classList.add(
+            'bg-blue-50',
+            'dark:bg-blue-900/30',
+            'text-blue-600',
+            'dark:text-blue-400'
+          );
+        } else {
+          option.classList.add('text-neutral-700', 'dark:text-neutral-200');
+        }
+
+        // Update aria-selected
+        option.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+
+        // Update checkmark
+        const checkIcon = option.querySelector('.check-icon');
+        if (isSelected && !checkIcon) {
+          const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          svg.setAttribute('class', 'w-5 h-5 text-blue-600 dark:text-blue-400 check-icon');
+          svg.setAttribute('fill', 'none');
+          svg.setAttribute('stroke', 'currentColor');
+          svg.setAttribute('viewBox', '0 0 24 24');
+          svg.setAttribute('stroke-width', '2');
+          svg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.check}" />`;
+          option.querySelector('div')?.appendChild(svg);
+        } else if (!isSelected && checkIcon) {
+          checkIcon.remove();
+        }
+      });
+    }
+
+    private startQuiz(mode: 'exam' | 'study'): void {
+      // Shuffle all questions and take the selected count
+      const shuffled = shuffleArray(this.data.questions);
+      const selectedQuestions = shuffled.slice(0, this.state.selectedQuestionCount);
+      const activeQuestionIds = selectedQuestions.map((q) => q.id);
+
+      this.state = {
+        isActive: true,
+        mode,
+        currentQuestion: 0,
+        answers: new Array(selectedQuestions.length).fill(null),
+        startTime: Date.now(),
+        showResults: false,
+        selectedQuestionCount: this.state.selectedQuestionCount,
+        activeQuestionIds,
+      };
+      this.saveState();
+      this.showQuizScreen();
+    }
+
+    private showQuizScreen(): void {
+      const screen = this.container.querySelector('[data-screen="quiz"]');
+      if (!screen) return;
+
+      screen.innerHTML = this.renderQuizContent();
+      this.showScreen('quiz');
+      this.bindQuizEvents();
+    }
+
+    private renderQuizContent(): string {
+      const { translations: t } = this.data;
+      const activeQuestions = this.getActiveQuestions();
+      const q = activeQuestions[this.state.currentQuestion];
+      if (!q) return '<div class="text-center p-4">No question available</div>';
+      const isStudyMode = this.state.mode === 'study';
+      const hasAnswered = this.state.answers[this.state.currentQuestion] !== null;
+      const userAnswer = this.state.answers[this.state.currentQuestion] ?? null;
+      const isCorrect = hasAnswered && userAnswer === q.correctAnswer;
+      const totalQuestions = activeQuestions.length;
+      const isLastQuestion = this.state.currentQuestion === totalQuestions - 1;
+      const answeredCount = countAnswered(this.state.answers);
+      const progress = calculateProgress(this.state.currentQuestion, totalQuestions);
+
+      return `
+        <div class="w-full space-y-4" role="region" aria-label="${t.question} ${this.state.currentQuestion + 1} ${t.of} ${totalQuestions}">
+          <div class="rounded-2xl bg-white dark:bg-neutral-800 overflow-hidden shadow-sm">
+            <div class="h-1.5 ${isStudyMode ? 'bg-green-600' : 'bg-blue-600'}" role="presentation"></div>
+            <div class="p-4">
+              <div class="flex items-center justify-between gap-3 mb-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center font-bold text-white text-base ${isStudyMode ? 'bg-green-600' : 'bg-blue-600'}" aria-hidden="true">
+                    ${this.state.currentQuestion + 1}
+                  </div>
+                  <div>
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-white">
+                      ${t.question} ${this.state.currentQuestion + 1} ${t.of} ${totalQuestions}
+                    </h4>
+                    <span class="text-sm sm:text-base text-neutral-600 dark:text-neutral-300">${q.domain}</span>
+                  </div>
+                </div>
+                <span class="text-sm font-semibold px-3 py-1.5 rounded-full whitespace-nowrap ${isStudyMode ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'}">
+                  ${isStudyMode ? t.studyMode : t.examMode}
+                </span>
+              </div>
+
+              <div class="mb-3">
+                <div class="flex items-center justify-between text-sm text-neutral-600 dark:text-neutral-300 mb-1.5">
+                  <span>${t.progress}: ${progress}%</span>
+                  <span>${answeredCount} ${t.answered}</span>
+                </div>
+                <div class="w-full bg-neutral-200 dark:bg-neutral-600 rounded-full h-2.5 overflow-hidden" role="progressbar" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100" aria-label="${t.progress}">
+                  <div class="h-2.5 rounded-full transition-all duration-500 ${isStudyMode ? 'bg-green-600' : 'bg-blue-600'}" style="width: ${progress}%"></div>
+                </div>
+              </div>
+
+              <div class="flex gap-2" role="group" aria-label="Quiz actions">
+                <button class="quiz-finish-btn flex-1 sm:flex-none ${TOUCH_TARGET.min} px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-base font-semibold rounded-lg transition-colors ${FOCUS_RING.base} focus:ring-rose-500">
+                  ${t.finish}
+                </button>
+                <button class="quiz-reset-btn flex-1 sm:flex-none ${TOUCH_TARGET.min} px-4 py-2.5 bg-neutral-600 hover:bg-neutral-700 text-white text-base font-semibold rounded-lg transition-colors ${FOCUS_RING.base} focus:ring-neutral-500">
+                  ${t.reset}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-2xl bg-white dark:bg-neutral-800 overflow-hidden shadow-sm">
+            <div class="p-5">
+              <h5 id="question-text" class="text-base font-semibold text-neutral-900 dark:text-white mb-5 leading-relaxed">
+                ${q.question}
+              </h5>
+              <div class="space-y-3" role="radiogroup" aria-labelledby="question-text">
+                ${q.options.map((option, index) => this.renderOption(option, index, q, isStudyMode, hasAnswered, userAnswer)).join('')}
+              </div>
+
+              ${isStudyMode && hasAnswered ? this.renderExplanation(q, isCorrect, userAnswer) : ''}
+            </div>
+          </div>
+
+          <nav class="rounded-2xl bg-white dark:bg-neutral-800 overflow-hidden shadow-sm" aria-label="Question navigation">
+            <div class="p-4">
+              <div class="flex items-center justify-between gap-3">
+                ${
+                  isStudyMode
+                    ? `
+                  <button
+                    class="quiz-prev-btn ${TOUCH_TARGET.minSquare} px-4 py-2.5 bg-neutral-200 dark:bg-neutral-600 hover:bg-neutral-300 dark:hover:bg-neutral-500 disabled:opacity-40 disabled:cursor-not-allowed text-neutral-800 dark:text-white text-base font-semibold rounded-xl transition-colors inline-flex items-center justify-center gap-2 ${FOCUS_RING.base} focus:ring-neutral-500"
+                    ${this.state.currentQuestion === 0 ? 'disabled aria-disabled="true"' : ''}
+                    aria-label="${t.previous} question"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.chevronLeft}" />
+                    </svg>
+                    <span class="hidden sm:inline">${t.previous}</span>
+                  </button>
+                `
+                    : '<div></div>'
+                }
+                <span class="text-base font-medium text-neutral-700 dark:text-neutral-200" aria-live="polite">
+                  ${this.state.currentQuestion + 1} / ${totalQuestions}
+                </span>
+                ${
+                  isLastQuestion
+                    ? `
+                  <button
+                    class="quiz-complete-btn ${TOUCH_TARGET.min} px-5 py-2.5 text-base font-semibold rounded-xl transition-all inline-flex items-center gap-2 ${isStudyMode ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'} text-white ${FOCUS_RING.base}"
+                    aria-label="${t.finishQuiz}"
+                  >
+                    <span>${t.finishQuiz}</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.check}" />
+                    </svg>
+                  </button>
+                `
+                    : `
+                  <button
+                    class="quiz-next-btn ${TOUCH_TARGET.min} px-5 py-2.5 text-base font-semibold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-2 ${isStudyMode ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'} text-white ${FOCUS_RING.base}"
+                    ${this.state.mode === 'exam' && userAnswer === null ? 'disabled aria-disabled="true"' : ''}
+                    aria-label="${t.next} question"
+                  >
+                    <span>${t.next}</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.chevronRight}" />
+                    </svg>
+                  </button>
+                `
+                }
+              </div>
+            </div>
+          </nav>
+        </div>
+      `;
+    }
+
+    private renderOption(
+      option: string,
+      index: number,
+      q: Question,
+      isStudyMode: boolean,
+      hasAnswered: boolean,
+      userAnswer: number | null
+    ): string {
+      const isSelected = userAnswer === index;
+      const isCorrectOption = index === q.correctAnswer;
+      const showFeedback = isStudyMode && hasAnswered;
+      const letter = getOptionLetter(index);
+
+      let optionClasses = '';
+      let iconHtml = '';
+
+      if (showFeedback) {
+        if (isCorrectOption) {
+          optionClasses =
+            'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 ring-2 ring-emerald-500/20';
+          iconHtml = generateTextBoxHTML(letter, this.data.iconBoxPresets.quizCorrect);
+        } else if (isSelected && !isCorrectOption) {
+          optionClasses = 'border-rose-500 bg-rose-50 dark:bg-rose-900/30 ring-2 ring-rose-500/20';
+          iconHtml = generateTextBoxHTML(letter, this.data.iconBoxPresets.quizIncorrect);
+        } else {
+          optionClasses =
+            'border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-700/50 opacity-60';
+          iconHtml = generateTextBoxHTML(letter, this.data.iconBoxPresets.quizNeutral);
+        }
+      } else {
+        if (isSelected) {
+          optionClasses =
+            'border-primary-500 bg-primary-50 dark:bg-primary-900/30 ring-2 ring-primary-500/20';
+          iconHtml = generateTextBoxHTML(letter, this.data.iconBoxPresets.quizSelected);
+        } else {
+          optionClasses =
+            'border-neutral-200 dark:border-neutral-600 hover:border-primary-300 dark:hover:border-primary-500 bg-white dark:bg-neutral-800';
+          iconHtml = generateTextBoxHTML(letter, this.data.iconBoxPresets.quizDefault);
+        }
+      }
+
+      const textClasses = showFeedback
+        ? isCorrectOption
+          ? 'text-emerald-800 dark:text-emerald-200 font-medium'
+          : isSelected
+            ? 'text-rose-800 dark:text-rose-200'
+            : 'text-neutral-600 dark:text-neutral-300'
+        : 'text-neutral-700 dark:text-neutral-200';
+
+      const ariaLabel = showFeedback
+        ? isCorrectOption
+          ? `${letter}. ${option} - Correct answer`
+          : isSelected
+            ? `${letter}. ${option} - Your answer, incorrect`
+            : `${letter}. ${option}`
+        : `${letter}. ${option}${isSelected ? ' - Selected' : ''}`;
+
+      return `
+        <button
+          class="quiz-option w-full text-left ${TOUCH_TARGET.comfortable} p-4 rounded-xl border-2 transition-all duration-300 group ${optionClasses} ${showFeedback ? 'cursor-default' : 'cursor-pointer'} ${FOCUS_RING.base} focus:ring-primary-500"
+          data-index="${index}"
+          role="radio"
+          aria-checked="${isSelected}"
+          aria-label="${ariaLabel}"
+          ${showFeedback ? 'disabled aria-disabled="true"' : ''}
+        >
+          <div class="flex items-center gap-3">
+            ${iconHtml}
+            <span class="text-base leading-relaxed ${textClasses}">${option}</span>
+          </div>
+        </button>
+      `;
+    }
+
+    private renderExplanation(q: Question, isCorrect: boolean, _userAnswer: number | null): string {
+      const { translations: t } = this.data;
+      const letter = getOptionLetter(q.correctAnswer);
+
+      return `
+        <div class="mt-5 space-y-3">
+          <div class="p-4 rounded-xl ${
+            isCorrect
+              ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700'
+              : 'bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-700'
+          }">
+            <div class="flex items-center gap-2 ${isCorrect ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}">
+              ${
+                isCorrect
+                  ? `
+                <div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.check}" />
+                  </svg>
+                </div>
+                <span class="font-bold text-base">${t.correct}!</span>
+              `
+                  : `
+                <div class="w-8 h-8 rounded-lg bg-rose-500 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.close}" />
+                  </svg>
+                </div>
+                <span class="font-bold text-base">${t.incorrect}</span>
+              `
+              }
+            </div>
+          </div>
+
+          ${
+            !isCorrect
+              ? `
+            <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.check}" />
+                  </svg>
+                </div>
+                <p class="text-base text-emerald-700 dark:text-emerald-300">
+                  <span class="font-semibold">${t.correctAnswer}:</span> ${letter}) ${q.options[q.correctAnswer]}
+                </p>
+              </div>
+            </div>
+          `
+              : ''
+          }
+
+          <div class="p-4 rounded-xl bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
+            <p class="text-neutral-700 dark:text-neutral-300 text-base leading-relaxed">
+              <span class="font-semibold text-neutral-900 dark:text-white">${t.explanation}:</span> ${parseExplanation(q.explanation, this.data.iconPaths.externalLink as string)}
+            </p>
+          </div>
+        </div>
+      `;
+    }
+
+    private bindQuizEvents(): void {
+      const screen = this.container.querySelector('[data-screen="quiz"]');
+      if (!screen) return;
+
+      // Option selection
+      screen.querySelectorAll('.quiz-option').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          const index = parseInt((e.currentTarget as HTMLElement).dataset.index || '0');
+          this.selectAnswer(index);
+        });
+      });
+
+      // Navigation
+      screen.querySelector('.quiz-prev-btn')?.addEventListener('click', () => this.prevQuestion());
+      screen.querySelector('.quiz-next-btn')?.addEventListener('click', () => this.nextQuestion());
+      screen
+        .querySelector('.quiz-complete-btn')
+        ?.addEventListener('click', () => this.finishQuiz());
+      screen.querySelector('.quiz-finish-btn')?.addEventListener('click', () => this.finishQuiz());
+      screen.querySelector('.quiz-reset-btn')?.addEventListener('click', () => this.resetQuiz());
+    }
+
+    private selectAnswer(index: number): void {
+      this.state.answers[this.state.currentQuestion] = index;
+      this.saveState();
+      this.showQuizScreen();
+    }
+
+    private prevQuestion(): void {
+      if (this.state.currentQuestion > 0) {
+        this.state.currentQuestion--;
+        this.saveState();
+        this.showQuizScreen();
+      }
+    }
+
+    private nextQuestion(): void {
+      const activeQuestions = this.getActiveQuestions();
+      if (this.state.currentQuestion < activeQuestions.length - 1) {
+        this.state.currentQuestion++;
+        this.saveState();
+        this.showQuizScreen();
+      }
+    }
+
+    private finishQuiz(): void {
+      this.state.isActive = false;
+      this.state.showResults = true;
+      this.saveState();
+      this.showResultsScreen();
+    }
+
+    private resetQuiz(): void {
+      clearState(this.data.certificationId, OPTIMIZED_STORAGE);
+
+      // Get first option value from dropdown to use as default
+      const firstOption = this.container.querySelector(
+        '.question-count-option'
+      ) as HTMLElement | null;
+      const defaultCount = firstOption ? parseInt(firstOption.dataset.value || '10') : 10;
+
+      this.state = createDefaultState(this.data.questions, defaultCount);
+      this.showStartScreen();
+      // Note: DO NOT call bindEvents() here - the start screen elements are static
+      // and already have their handlers from the initial init() call.
+      // Calling bindEvents() again would add duplicate listeners.
+    }
+
+    private getScore() {
+      return calculateScore(this.state, this.data.questions);
+    }
+
+    private showResultsScreen(): void {
+      const screen = this.container.querySelector('[data-screen="results"]');
+      if (!screen) return;
+
+      screen.innerHTML = this.renderResultsContent();
+      this.showScreen('results');
+      this.bindResultsEvents();
+    }
+
+    private renderResultsContent(): string {
+      const { translations: t, certificationId } = this.data;
+      const { score, correct, total, passed, timeUsedMinutes } = this.getScore();
+
+      return `
+        <div class="space-y-4">
+          <div class="rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 overflow-hidden shadow-sm">
+            <div class="quiz-results-card">
+              <div class="p-5 sm:p-6 text-white text-center ${passed ? 'bg-green-600' : 'bg-red-600'}">
+                <div class="text-xs sm:text-sm font-bold uppercase tracking-wider opacity-90 mb-2">
+                  ${certificationId.toUpperCase()} Practice Quiz
+                </div>
+                <div class="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-3 rounded-xl bg-white/20 flex items-center justify-center">
+                  ${
+                    passed
+                      ? `
+                    <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.check}" />
+                    </svg>
+                  `
+                      : `
+                    <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.close}" />
+                    </svg>
+                  `
+                  }
+                </div>
+                <h4 class="text-base sm:text-lg font-bold mb-1">${t.quizComplete}</h4>
+                <div class="text-3xl sm:text-4xl font-black mb-1">${score}%</div>
+                <p class="text-white/90 font-medium text-sm">
+                  ${passed ? t.passed : t.failed} (${t.threshold}: 75%)
+                </p>
+              </div>
+
+              <div class="p-4 sm:p-5 space-y-4">
+                <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                  <div class="rounded-xl bg-green-50 dark:bg-green-900/20 p-3 text-center">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 mx-auto mb-1.5 bg-green-600 text-white rounded-lg flex items-center justify-center">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.check}" />
+                      </svg>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-bold text-green-700 dark:text-green-400">${correct}</h3>
+                    <p class="text-green-600 dark:text-green-300 text-xs sm:text-sm">${t.correctCount}</p>
+                  </div>
+                  <div class="rounded-xl bg-red-50 dark:bg-red-900/20 p-3 text-center">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 mx-auto mb-1.5 bg-red-600 text-white rounded-lg flex items-center justify-center">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.close}" />
+                      </svg>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-bold text-red-700 dark:text-red-400">${total - correct}</h3>
+                    <p class="text-red-600 dark:text-red-300 text-xs sm:text-sm">${t.incorrectCount}</p>
+                  </div>
+                  <div class="rounded-xl bg-blue-50 dark:bg-blue-900/20 p-3 text-center">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 mx-auto mb-1.5 bg-blue-600 text-white rounded-lg flex items-center justify-center">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.clock}" />
+                      </svg>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-bold text-blue-700 dark:text-blue-400">${timeUsedMinutes}m</h3>
+                    <p class="text-blue-600 dark:text-blue-300 text-xs sm:text-sm">${t.timeUsed}</p>
+                  </div>
+                </div>
+
+                <div class="text-center text-xs text-neutral-400 dark:text-neutral-500">
+                  cncerthub.xyz
+                </div>
+              </div>
+            </div>
+
+            <div class="px-4 pb-4 sm:px-5 sm:pb-5">
+              <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <button class="results-restart-btn flex-1 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all inline-flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.sync}" />
+                </svg>
+                ${t.takeAnother}
+              </button>
+              <div class="relative flex-1">
+                <button class="results-share-btn w-full px-5 py-3 bg-green-600 hover:bg-green-700 disabled:opacity-70 disabled:cursor-wait text-white font-semibold rounded-xl transition-all inline-flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5 share-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.share}" />
+                  </svg>
+                  <svg class="w-5 h-5 spinner-icon hidden animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span class="share-text">${t.shareResult}</span>
+                </button>
+
+                <div class="share-menu hidden absolute bottom-full left-0 right-0 mb-2 z-50 bg-white dark:bg-neutral-800 rounded-xl shadow-xl overflow-hidden">
+                  <div class="p-2 space-y-1">
+                    <button class="share-whatsapp w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors">
+                      <div class="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="${this.data.iconPaths.whatsapp}"/>
+                        </svg>
+                      </div>
+                      <span class="font-medium text-neutral-700 dark:text-neutral-200">WhatsApp</span>
+                    </button>
+                    <button class="share-linkedin w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                      <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="${this.data.iconPaths.linkedin}"/>
+                        </svg>
+                      </div>
+                      <span class="font-medium text-neutral-700 dark:text-neutral-200">LinkedIn</span>
+                    </button>
+                    <button class="share-twitter w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+                      <div class="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="${this.data.iconPaths.twitter}"/>
+                        </svg>
+                      </div>
+                      <span class="font-medium text-neutral-700 dark:text-neutral-200">X (Twitter)</span>
+                    </button>
+                    <div class="border-t border-neutral-200 dark:border-neutral-700 my-1"></div>
+                    <button class="share-download w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors">
+                      <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.download}" />
+                        </svg>
+                      </div>
+                      <span class="font-medium text-neutral-700 dark:text-neutral-200">${t.downloadImage}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="share-backdrop hidden fixed inset-0 z-40"></div>
+              </div>
+            </div>
+          </div>
+          </div>
+
+          <div class="share-toast hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 animate-pulse">
+            <div class="flex items-center gap-3 px-5 py-3 bg-amber-500 text-white rounded-xl shadow-lg">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="${this.data.iconPaths.info}" />
+              </svg>
+              <span class="font-medium text-base toast-message"></span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    private bindResultsEvents(): void {
+      const screen = this.container.querySelector('[data-screen="results"]');
+      if (!screen) return;
+
+      screen
+        .querySelector('.results-restart-btn')
+        ?.addEventListener('click', () => this.resetQuiz());
+
+      const shareBtn = screen.querySelector('.results-share-btn');
+      const shareMenu = screen.querySelector('.share-menu');
+      const shareBackdrop = screen.querySelector('.share-backdrop');
+
+      shareBtn?.addEventListener('click', () => this.handleShare());
+
+      // Close menu when clicking backdrop
+      shareBackdrop?.addEventListener('click', () => {
+        shareMenu?.classList.add('hidden');
+        shareBackdrop?.classList.add('hidden');
+      });
+
+      // Share buttons
+      screen
+        .querySelector('.share-whatsapp')
+        ?.addEventListener('click', () => this.shareToWhatsApp());
+      screen
+        .querySelector('.share-linkedin')
+        ?.addEventListener('click', () => this.shareToLinkedIn());
+      screen
+        .querySelector('.share-twitter')
+        ?.addEventListener('click', () => this.shareToTwitter());
+      screen
+        .querySelector('.share-download')
+        ?.addEventListener('click', () => this.downloadImage());
+    }
+
+    private async getResultImage(): Promise<Blob | null> {
+      const resultsCard = this.container.querySelector('.quiz-results-card');
+      if (!resultsCard) return null;
+      return generateResultImage(resultsCard as HTMLElement);
+    }
+
+    private getShareText(): string {
+      const score = this.getScore();
+      return generateShareText(score, this.data.certificationId, this.data.lang);
+    }
+
+    private async handleShare(): Promise<void> {
+      const shareMenu = this.container.querySelector('.share-menu');
+      const shareBackdrop = this.container.querySelector('.share-backdrop');
+
+      // Try native share first
+      const imageBlob = await this.getResultImage();
+      if (imageBlob && canShareFiles()) {
+        const file = new File([imageBlob], `${this.data.certificationId}-quiz-result.png`, {
+          type: 'image/png',
+        });
+        try {
+          await navigator.share({
+            title: `${this.data.certificationId.toUpperCase()} Quiz Results`,
+            text: this.getShareText(),
+            files: [file],
+          });
+          return;
+        } catch {
+          // Fall through to menu
+        }
+      }
+
+      // Show share menu
+      shareMenu?.classList.remove('hidden');
+      shareBackdrop?.classList.remove('hidden');
+    }
+
+    private shareToSocial(platform: 'whatsapp' | 'linkedin' | 'twitter'): void {
+      const shareMenu = this.container.querySelector('.share-menu');
+      const shareBackdrop = this.container.querySelector('.share-backdrop');
+      shareMenu?.classList.add('hidden');
+      shareBackdrop?.classList.add('hidden');
+
+      const shareText = this.getShareText();
+      const langPath = this.data.lang === 'en' ? '' : `/${this.data.lang}`;
+      const url = `https://cncerthub.xyz${langPath}/certifications/${this.data.certificationId}`;
+
+      // LinkedIn only accepts URL (OG tags will show preview)
+      if (platform === 'linkedin') {
+        openSocialShare(platform, url);
+      } else {
+        // WhatsApp and Twitter: share text with URL (OG tags will show preview)
+        openSocialShare(platform, shareText);
+      }
+    }
+
+    private shareToWhatsApp(): void {
+      this.shareToSocial('whatsapp');
+    }
+    private shareToLinkedIn(): void {
+      this.shareToSocial('linkedin');
+    }
+    private shareToTwitter(): void {
+      this.shareToSocial('twitter');
+    }
+
+    private async downloadImage(): Promise<boolean> {
+      const shareMenu = this.container.querySelector('.share-menu');
+      const shareBackdrop = this.container.querySelector('.share-backdrop');
+      shareMenu?.classList.add('hidden');
+      shareBackdrop?.classList.add('hidden');
+
+      const imageBlob = await this.getResultImage();
+      if (imageBlob) {
+        downloadImageUtil(imageBlob, `${this.data.certificationId}-quiz-result.png`);
+        return true;
+      }
+      return false;
+    }
+  }
+
+  // Initialize all quiz simulators
+  function initQuizSimulators(): void {
+    document.querySelectorAll('.quiz-simulator[data-quiz]').forEach((container) => {
+      if (!(container as any)._quizInit) {
+        new QuizSimulator(container as HTMLElement);
+        (container as any)._quizInit = true;
+      }
+    });
+  }
+
+  // Initialize on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initQuizSimulators);
+  } else {
+    initQuizSimulators();
+  }
+
+  // Re-initialize after Astro page transitions
+  document.addEventListener('astro:after-swap', initQuizSimulators);
+</script>

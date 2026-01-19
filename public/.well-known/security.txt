@@ -1,0 +1,10 @@
+# CNCF Certification Hub Security Policy
+# https://securitytxt.org/
+
+Contact: https://github.com/jeanlopezxyz/cncf-certification-hub/security/advisories/new
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en, es, pt
+Canonical: https://cncerthub.xyz/.well-known/security.txt
+
+# Please report security vulnerabilities responsibly
+# We appreciate your help in keeping this project secure

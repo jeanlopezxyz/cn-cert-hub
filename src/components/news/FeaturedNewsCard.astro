@@ -1,0 +1,104 @@
+---
+/**
+ * FeaturedNewsCard Component
+ * Hero card matching site design - no gradients, no borders
+ * Uses reusable Badge and Icon components
+ */
+import type { NewsItem } from '@/data/news';
+import { useTranslations, type Language } from '@/i18n/utils';
+import {
+  getCategoryStyles,
+  getCategoryBadgeVariant,
+  getCategoryIconName,
+  formatDate,
+} from '@/utils';
+import { CARDS } from '@/app';
+import Badge from '@/components/ui/Badge.astro';
+import Icon from '@/components/ui/Icon.astro';
+
+interface Props {
+  item: NewsItem;
+  lang: Language;
+}
+
+const { item, lang } = Astro.props;
+const t = useTranslations(lang);
+
+// Use centralized utilities
+const styles = getCategoryStyles(item.category);
+const badgeVariant = getCategoryBadgeVariant(item.category);
+const iconName = getCategoryIconName(item.category);
+
+const formattedDate = formatDate(item.publishedAt, lang, 'long');
+---
+
+<article class="featured-news group">
+  <a
+    href={item.url}
+    target="_blank"
+    rel="noopener noreferrer"
+    class={`card block h-full ${CARDS.base} border-0 ${styles.bg}`}
+  >
+    <div class="card-body p-6 sm:p-8">
+      <!-- Top badges -->
+      <div class="flex flex-wrap items-center gap-3 mb-5">
+        <!-- Featured badge -->
+        <Badge
+          variant="neutral"
+          size="lg"
+          rounded="full"
+          class="bg-neutral-700 dark:bg-neutral-600"
+        >
+          <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+          {t('news.featured').toUpperCase()}
+        </Badge>
+
+        <!-- Category badge -->
+        <Badge variant={badgeVariant} size="lg" rounded="full">
+          <Icon name={iconName} size="md" />
+          {t(`news.category.${item.category}`)}
+        </Badge>
+      </div>
+
+      <!-- Title -->
+      <h2 class={`text-xl sm:text-2xl lg:text-3xl font-bold ${styles.text} leading-tight mb-4`}>
+        {item.title}
+      </h2>
+
+      <!-- Description -->
+      <p
+        class="text-base sm:text-lg text-neutral-600 dark:text-neutral-300 leading-relaxed mb-6 max-w-4xl line-clamp-3"
+      >
+        {item.description}
+      </p>
+
+      <!-- Bottom section -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <!-- Left: Source and Date -->
+        <div
+          class="flex flex-wrap items-center gap-4 text-neutral-500 dark:text-neutral-400 text-sm"
+        >
+          <div class="flex items-center gap-2">
+            <div class={`w-8 h-8 rounded-full ${styles.badge} flex items-center justify-center`}>
+              <Icon name="newspaper" size="md" class="text-white" />
+            </div>
+            <span class="text-neutral-700 dark:text-neutral-300 font-medium">{item.source}</span>
+          </div>
+          <span class="text-neutral-400">•</span>
+          <time class="flex items-center gap-2">
+            <Icon name="calendar" size="md" />
+            {formattedDate}
+          </time>
+        </div>
+
+        <!-- Right: CTA Button -->
+        <span
+          class={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl ${styles.badge} font-medium`}
+        >
+          {t('news.readMore')}
+          <Icon name="externalLink" size="md" />
+        </span>
+      </div>
+    </div>
+  </a>
+</article>

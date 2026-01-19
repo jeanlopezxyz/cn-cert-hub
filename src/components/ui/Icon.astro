@@ -1,0 +1,60 @@
+---
+/**
+ * Reusable Icon Component
+ * Renders SVG icons using astro-icon with Heroicons and Simple Icons
+ *
+ * Usage:
+ *   <Icon name="check" />                    - Uses heroicons:check (decorative, hidden from screen readers)
+ *   <Icon name="github" />                   - Uses simple-icons:github
+ *   <Icon name="heroicons:star-solid" />     - Direct iconify name
+ *   <Icon name="checkCircle" filled />       - Uses solid variant
+ *   <Icon name="info" aria-label="Information" aria-hidden={false} /> - Semantic icon
+ *
+ * Accessibility:
+ *   - Decorative icons (default): aria-hidden="true"
+ *   - Semantic icons: Provide aria-label and set aria-hidden={false}
+ *   - Icons in buttons/links: Ensure parent element has accessible text or aria-label
+ */
+import { Icon as AstroIcon } from 'astro-icon/components';
+import { getIconName } from '@/utils';
+
+export interface Props {
+  /** Icon name (short or full iconify format) */
+  name: string;
+  /** Icon size */
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  /** Additional CSS classes */
+  class?: string;
+  /** Stroke width (only affects outline icons) */
+  strokeWidth?: number;
+  /** Use filled/solid variant */
+  filled?: boolean;
+  /** Accessibility label (required if aria-hidden is false) */
+  'aria-label'?: string;
+  /** Hide from screen readers (default: true for decorative icons) */
+  'aria-hidden'?: boolean;
+}
+
+const {
+  name,
+  size = 'md',
+  class: className = '',
+  filled = false,
+  'aria-label': ariaLabel,
+  'aria-hidden': ariaHidden = true,
+} = Astro.props;
+
+const sizeClasses: Record<string, string> = {
+  xs: 'w-3 h-3',
+  sm: 'w-3.5 h-3.5',
+  md: 'w-4 h-4',
+  lg: 'w-5 h-5',
+  xl: 'w-6 h-6',
+  '2xl': 'w-8 h-8',
+};
+
+const classes = [sizeClasses[size], className].filter(Boolean).join(' ');
+const iconName = getIconName(name, filled);
+---
+
+<AstroIcon name={iconName} class={classes} aria-label={ariaLabel} aria-hidden={ariaHidden} />

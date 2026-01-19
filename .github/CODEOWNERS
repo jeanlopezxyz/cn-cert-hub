@@ -1,0 +1,32 @@
+# CODEOWNERS - Defines who reviews PRs for different parts of the codebase
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything
+* @jeanlopezxyz
+
+# Documentation
+*.md @jeanlopezxyz
+/docs/ @jeanlopezxyz
+
+# CI/CD and GitHub config
+/.github/ @jeanlopezxyz
+
+# Core application code
+/src/app/ @jeanlopezxyz
+/src/components/ @jeanlopezxyz
+/src/layouts/ @jeanlopezxyz
+/src/pages/ @jeanlopezxyz
+
+# Data files (questions, resources, certifications)
+/src/data/ @jeanlopezxyz
+
+# Translations
+/src/i18n/ @jeanlopezxyz
+
+# Tests
+/tests/ @jeanlopezxyz
+
+# Configuration files
+*.config.* @jeanlopezxyz
+tsconfig.json @jeanlopezxyz
+package.json @jeanlopezxyz

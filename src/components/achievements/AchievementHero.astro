@@ -1,0 +1,96 @@
+---
+import { CARDS } from '@/app';
+import Icon from '@/components/ui/Icon.astro';
+import Button from '@/components/ui/Button.astro';
+import { getAchievementHeroColors, type AchievementHeroTheme } from '@/utils';
+
+interface Props {
+  title: string;
+  description: string;
+  iconSrc?: string;
+  certCount: number;
+  certCountLabel: string;
+  certRequiredLabel: string;
+  gradientClass?: string;
+  particleStyle?: AchievementHeroTheme;
+  ctaText?: string;
+  ctaHref?: string;
+  secondaryCtaText?: string;
+  secondaryCtaHref?: string;
+}
+
+const {
+  title,
+  description,
+  certCount,
+  certCountLabel,
+  certRequiredLabel,
+  particleStyle = 'cosmic',
+  ctaText,
+  ctaHref,
+  secondaryCtaText,
+  secondaryCtaHref,
+} = Astro.props;
+
+const colors = getAchievementHeroColors(particleStyle);
+---
+
+<!-- WowDash Style Hero Card -->
+<div class={`card ${CARDS.base} border-0 ${colors.cardBg} mb-6 sm:mb-8`}>
+  <div class="card-body p-5 sm:p-6 lg:p-8">
+    <div
+      class="flex flex-col sm:flex-row items-center sm:items-center justify-between gap-4 sm:gap-6"
+    >
+      <!-- Content - Left side -->
+      <div class="flex-1 text-center sm:text-left">
+        <h1 class={`text-2xl sm:text-3xl lg:text-4xl font-bold ${colors.titleColor} mb-2`}>
+          {title}
+        </h1>
+        <p class={`${colors.descColor} text-base mb-4`}>
+          {description}
+        </p>
+
+        <!-- CTA Buttons -->
+        {
+          ctaText && ctaHref && (
+            <div class="flex flex-col sm:flex-row gap-3">
+              <Button
+                href={ctaHref}
+                variant="primary"
+                size="md"
+                withScale={true}
+                class={`${colors.countBg} text-white font-semibold shadow-lg hover:opacity-90`}
+              >
+                {ctaText}
+                <Icon name="arrowRight" size="md" />
+              </Button>
+              {secondaryCtaText && secondaryCtaHref && (
+                <Button
+                  href={secondaryCtaHref}
+                  target="_blank"
+                  variant="ghost"
+                  size="md"
+                  class={`${colors.badgeBg} ${colors.badgeText} font-semibold hover:opacity-80`}
+                >
+                  <Icon name="externalLink" size="md" />
+                  {secondaryCtaText}
+                </Button>
+              )}
+            </div>
+          )
+        }
+      </div>
+
+      <!-- Certification count badge - Right side -->
+      <div
+        class={`${colors.countBg} ${colors.countText} px-5 py-3 rounded-xl flex items-center gap-3 flex-shrink-0`}
+      >
+        <span class="text-3xl sm:text-4xl font-bold">{certCount}</span>
+        <div class="text-left">
+          <div class="text-sm sm:text-base font-semibold leading-tight">{certCountLabel}</div>
+          <div class="text-sm sm:text-base font-semibold leading-tight">{certRequiredLabel}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

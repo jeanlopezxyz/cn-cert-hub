@@ -1,0 +1,73 @@
+name: Content Request
+description: Request new questions, resources, or translations
+title: "[Content]: "
+labels: ["content"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to request new content for the certification hub.
+
+        **Want to add content yourself?** Check our [Contributing Guide](https://github.com/jeanlopezxyz/cn-cert-hub/blob/main/CONTRIBUTING.md).
+
+  - type: dropdown
+    id: content-type
+    attributes:
+      label: Content type
+      description: What type of content are you requesting?
+      options:
+        - Practice Questions
+        - Study Resources
+        - Translation
+        - Best Practices
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: certification
+    attributes:
+      label: Certification
+      description: Which certification is this related to?
+      options:
+        - CKA (Certified Kubernetes Administrator)
+        - CKAD (Certified Kubernetes Application Developer)
+        - CKS (Certified Kubernetes Security Specialist)
+        - KCNA (Kubernetes and Cloud Native Associate)
+        - KCSA (Kubernetes and Cloud Native Security Associate)
+        - LFCS (Linux Foundation Certified System Administrator)
+        - PCA (Prometheus Certified Associate)
+        - CGOA (Certified GitOps Associate)
+        - CCA (Cilium Certified Associate)
+        - ICA (Istio Certified Associate)
+        - CAPA (Certified Argo Project Associate)
+        - OTCA (OpenTelemetry Certified Associate)
+        - Multiple/General
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe what content you'd like to see added.
+      placeholder: |
+        For questions: Topic area, difficulty level, specific concepts
+        For resources: URL, title, why it's valuable
+        For translations: Language, specific pages/sections
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Links to official documentation or resources that support this request.
+
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Would you like to contribute?
+      options:
+        - label: I'd like to add this content myself
+          required: false

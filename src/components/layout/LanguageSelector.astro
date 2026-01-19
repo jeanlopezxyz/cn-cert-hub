@@ -1,0 +1,141 @@
+---
+import { LANGUAGES } from '@/i18n/ui';
+import { getLangFromUrl, useTranslations } from '@/i18n/utils';
+
+interface Props {
+  currentLang?: string;
+}
+
+const { currentLang: propLang } = Astro.props;
+const currentLang = propLang || getLangFromUrl(Astro.url);
+const t = useTranslations(currentLang as 'en' | 'es' | 'pt');
+
+// Get uppercase code for display
+const getLangCode = (lang: string) => lang.toUpperCase();
+---
+
+<div class="relative flex items-center h-16" id="lang-selector">
+  <button
+    type="button"
+    id="lang-toggle"
+    class="inline-flex justify-center items-center p-0 w-11 h-11 text-neutral-600 dark:text-neutral-400 transition-all duration-200 ease-linear bg-transparent rounded-md dropdown-toggle hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-primary-600 dark:hover:text-primary-400"
+    aria-label={`${getLangCode(currentLang)} - ${t('aria.selectLanguage')}`}
+    aria-expanded="false"
+    aria-haspopup="listbox"
+  >
+    <span class="text-sm font-bold" aria-hidden="true">{getLangCode(currentLang)}</span>
+  </button>
+
+  <div
+    id="lang-dropdown"
+    role="listbox"
+    aria-label={t('aria.selectLanguage')}
+    class="hidden absolute z-50 p-4 ltr:text-left rtl:text-right bg-white dark:bg-neutral-800 rounded-md shadow-lg dark:shadow-neutral-900/50 top-full mt-1 right-0 min-w-[10rem] flex-col gap-3 border border-neutral-200 dark:border-neutral-600"
+  >
+    {
+      Object.entries(LANGUAGES).map(([lang, name]) => {
+        const isActive = currentLang === lang;
+        return (
+          <button
+            type="button"
+            data-lang={lang}
+            role="option"
+            aria-selected={isActive ? 'true' : 'false'}
+            class="lang-option flex items-center gap-3 group/items transition-all duration-200 ease-linear text-left w-full"
+          >
+            <div
+              class={`flex items-center justify-center w-6 h-6 rounded-full ${
+                isActive
+                  ? 'bg-primary-100 dark:bg-primary-600/30'
+                  : 'bg-neutral-100 dark:bg-neutral-700'
+              }`}
+              aria-hidden="true"
+            >
+              <span
+                class={`text-xs font-bold ${
+                  isActive
+                    ? 'text-primary-600 dark:text-primary-400'
+                    : 'text-neutral-500 dark:text-neutral-400'
+                }`}
+              >
+                {getLangCode(lang)}
+              </span>
+            </div>
+            <span
+              class={`font-medium text-base transition-all duration-200 ease-linear ${
+                isActive
+                  ? 'text-primary-600 dark:text-primary-400'
+                  : 'text-neutral-600 dark:text-neutral-400 group-hover/items:text-primary-500'
+              }`}
+            >
+              {name}
+            </span>
+          </button>
+        );
+      })
+    }
+  </div>
+</div>
+
+<script>
+  import { DropdownManager } from '@/utils';
+
+  function initLanguageSelector() {
+    const selector = document.getElementById('lang-selector');
+    const toggle = document.getElementById('lang-toggle');
+    const dropdown = document.getElementById('lang-dropdown');
+
+    if (!selector || !toggle || !dropdown) return;
+
+    // Initialize dropdown manager
+    const dropdownManager = new DropdownManager({
+      container: selector,
+      toggle,
+      dropdown,
+    });
+
+    // Handle language selection
+    const langOptions = dropdown.querySelectorAll('.lang-option');
+    langOptions.forEach((option) => {
+      option.addEventListener('click', () => {
+        const lang = option.getAttribute('data-lang');
+        if (!lang) return;
+
+        const path = window.location.pathname;
+        const segments = path.split('/').filter(Boolean);
+
+        // Remove current language if exists
+        const langs = ['en', 'es', 'pt'];
+        if (segments[0] && langs.includes(segments[0])) {
+          segments.shift();
+        }
+
+        // Build new path
+        let newPath = '';
+        if (lang !== 'en') {
+          newPath = '/' + lang;
+        }
+        if (segments.length > 0) {
+          newPath += '/' + segments.join('/');
+        }
+        if (!newPath) {
+          newPath = '/';
+        }
+
+        // Navigate using View Transitions
+        const link = document.createElement('a');
+        link.href = newPath;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        dropdownManager.close();
+      });
+    });
+  }
+
+  // Initialize on load and after navigation
+  initLanguageSelector();
+  document.addEventListener('astro:after-swap', initLanguageSelector);
+</script>

@@ -1,0 +1,114 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { getPageI18n } from '@/i18n';
+import { UPCOMING_CERTIFICATIONS } from '@/data/certifications/upcoming';
+import Icon from '@/components/ui/Icon.astro';
+import Button from '@/components/ui/Button.astro';
+
+const { lang, t } = getPageI18n(Astro.url);
+
+// CSS Classes - centralized for consistency
+const BADGE_CLASS = 'px-2.5 py-1 text-sm font-medium rounded-md';
+const CARD_PADDING = 'p-6';
+const HEADING_CLASS = 'text-lg font-semibold mb-3';
+---
+
+<Layout
+  title={t('certifications.upcoming.title')}
+  description={t('meta.upcoming')}
+  lang={lang}
+  showSidebar={true}
+>
+  <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-8 2xl:px-12 3xl:px-16 py-6 sm:py-8">
+    <div class="mb-6">
+      <div class="rounded-xl border-0 p-5 sm:p-6 bg-emerald-50 dark:bg-emerald-900/20">
+        <div class="flex items-start gap-4">
+          <div
+            class="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 inline-flex items-center justify-center bg-emerald-600 text-white rounded-xl"
+          >
+            <Icon name="clock" class="w-7 h-7 sm:w-8 sm:h-8" strokeWidth={1.5} />
+          </div>
+          <div class="min-w-0 flex-1">
+            <h1 class="text-2xl sm:text-3xl font-semibold text-emerald-600 dark:text-emerald-400">
+              {t('certifications.upcoming.title')}
+            </h1>
+            <p class="text-base sm:text-lg text-neutral-600 dark:text-neutral-300 line-clamp-2">
+              {t('certifications.upcoming.subtitle')}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      {
+        UPCOMING_CERTIFICATIONS.map((cert) => (
+          <div class="rounded-xl border-0 bg-cyan-50 dark:bg-cyan-900/20 overflow-hidden">
+            <div class={CARD_PADDING}>
+              <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="text-xl font-bold text-cyan-600 dark:text-cyan-400">
+                  {cert.acronym}
+                </span>
+                <span
+                  class={`${BADGE_CLASS} bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300`}
+                >
+                  {t('certifications.upcoming.statusDevelopment')}
+                </span>
+                <span
+                  class={`${BADGE_CLASS} bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300`}
+                >
+                  {t('certifications.upcoming.expected')} {cert.expectedDate}
+                </span>
+              </div>
+
+              <h2 class={`${HEADING_CLASS} text-cyan-700 dark:text-cyan-300`}>
+                {t(cert.titleKey)}
+              </h2>
+
+              <p class="text-neutral-600 dark:text-neutral-300 leading-relaxed mb-6">
+                {t(cert.descKey)}
+              </p>
+              <div class="mb-6">
+                <h3 class="text-sm font-semibold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider mb-3">
+                  {t('certifications.upcoming.keyFeatures')}
+                </h3>
+                <ul class="space-y-2">
+                  {cert.highlights.map((highlight) => (
+                    <li class="flex items-start gap-2 text-neutral-700 dark:text-neutral-200">
+                      <span class="text-cyan-600 dark:text-cyan-400 mt-1">•</span>
+                      <span>{t(highlight)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div class="flex flex-wrap gap-3">
+                <Button
+                  href={cert.officialUrl}
+                  target="_blank"
+                  variant="primary"
+                  size="sm"
+                  class="bg-cyan-600 hover:bg-cyan-700"
+                >
+                  {t('certifications.upcoming.visitCncf')}
+                  <Icon name="externalLink" size="sm" strokeWidth={2} />
+                </Button>
+                <Button href={cert.announcementUrl} target="_blank" variant="outline" size="sm">
+                  {t('certifications.upcoming.announcement')}
+                  <Icon name="externalLink" size="sm" strokeWidth={2} />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div
+      class="mt-8 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/30"
+    >
+      <p class="text-sm text-neutral-600 dark:text-neutral-400">
+        {t('certifications.upcoming.stayUpdatedDesc')}
+      </p>
+    </div>
+  </div>
+</Layout>

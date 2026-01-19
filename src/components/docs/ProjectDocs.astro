@@ -1,0 +1,316 @@
+---
+/**
+ * Project Documentation Page Component
+ * Displays all CNCF projects with links to their official documentation
+ */
+
+import type { Language } from '@/types';
+import { useTranslations } from '@/i18n/utils';
+import { APP_CONFIG, GRIDS } from '@/app';
+import Icon from '@/components/ui/Icon.astro';
+import Button from '@/components/ui/Button.astro';
+
+interface Props {
+  lang: Language;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  descKey: string;
+  url: string;
+  logo: string;
+  color: string;
+}
+
+interface Category {
+  key: string;
+  titleKey: string;
+  color: string;
+  projects: Project[];
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const DOCUMENTATION_CATEGORIES: Category[] = [
+  {
+    key: 'kubernetes',
+    titleKey: 'docs.category.kubernetes',
+    color: 'blue',
+    projects: [
+      {
+        id: 'kubernetes',
+        name: 'Kubernetes',
+        descKey: 'docs.kubernetes.desc',
+        url: 'https://kubernetes.io/docs/',
+        logo: '/logos/kubernetes.svg',
+        color: 'blue',
+      },
+    ],
+  },
+  {
+    key: 'gitops',
+    titleKey: 'docs.category.gitops',
+    color: 'purple',
+    projects: [
+      {
+        id: 'argocd',
+        name: 'Argo CD',
+        descKey: 'docs.argocd.desc',
+        url: 'https://argo-cd.readthedocs.io/',
+        logo: '/logos/argocd.svg',
+        color: 'orange',
+      },
+    ],
+  },
+  {
+    key: 'networking',
+    titleKey: 'docs.category.networking',
+    color: 'cyan',
+    projects: [
+      {
+        id: 'cilium',
+        name: 'Cilium',
+        descKey: 'docs.cilium.desc',
+        url: 'https://docs.cilium.io/',
+        logo: '/logos/cilium.svg',
+        color: 'amber',
+      },
+    ],
+  },
+  {
+    key: 'observability',
+    titleKey: 'docs.category.observability',
+    color: 'orange',
+    projects: [
+      {
+        id: 'opentelemetry',
+        name: 'OpenTelemetry',
+        descKey: 'docs.opentelemetry.desc',
+        url: 'https://opentelemetry.io/docs/',
+        logo: '/logos/opentelemetry.svg',
+        color: 'purple',
+      },
+      {
+        id: 'prometheus',
+        name: 'Prometheus',
+        descKey: 'docs.prometheus.desc',
+        url: 'https://prometheus.io/docs/',
+        logo: '/logos/prometheus.svg',
+        color: 'red',
+      },
+    ],
+  },
+  {
+    key: 'platform',
+    titleKey: 'docs.category.platform',
+    color: 'green',
+    projects: [
+      {
+        id: 'backstage',
+        name: 'Backstage',
+        descKey: 'docs.backstage.desc',
+        url: 'https://backstage.io/docs/',
+        logo: '/logos/backstage.svg',
+        color: 'cyan',
+      },
+    ],
+  },
+  {
+    key: 'security',
+    titleKey: 'docs.category.security',
+    color: 'red',
+    projects: [
+      {
+        id: 'kyverno',
+        name: 'Kyverno',
+        descKey: 'docs.kyverno.desc',
+        url: 'https://kyverno.io/docs/',
+        logo: '/logos/kyverno.svg',
+        color: 'green',
+      },
+    ],
+  },
+  {
+    key: 'serviceMesh',
+    titleKey: 'docs.category.serviceMesh',
+    color: 'indigo',
+    projects: [
+      {
+        id: 'istio',
+        name: 'Istio',
+        descKey: 'docs.istio.desc',
+        url: 'https://istio.io/latest/docs/',
+        logo: '/logos/istio.svg',
+        color: 'indigo',
+      },
+    ],
+  },
+  {
+    key: 'linux',
+    titleKey: 'docs.category.linux',
+    color: 'yellow',
+    projects: [
+      {
+        id: 'linux',
+        name: 'Linux',
+        descKey: 'docs.linux.desc',
+        url: 'https://www.kernel.org/doc/html/latest/',
+        logo: '/logos/linux.svg',
+        color: 'yellow',
+      },
+    ],
+  },
+];
+
+// Color mappings for soft badges and cards (WowDash style) - WCAG AA compliant
+const colorStyles: Record<string, { badge: string; icon: string; card: string }> = {
+  blue: {
+    badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+    icon: 'bg-blue-500',
+    card: 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100/80 dark:hover:bg-blue-900/30',
+  },
+  orange: {
+    badge: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
+    icon: 'bg-orange-500',
+    card: 'bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100/80 dark:hover:bg-orange-900/30',
+  },
+  amber: {
+    badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+    icon: 'bg-amber-500',
+    card: 'bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100/80 dark:hover:bg-amber-900/30',
+  },
+  purple: {
+    badge: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+    icon: 'bg-purple-500',
+    card: 'bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100/80 dark:hover:bg-purple-900/30',
+  },
+  red: {
+    badge: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+    icon: 'bg-red-500',
+    card: 'bg-red-50 dark:bg-red-900/20 hover:bg-red-100/80 dark:hover:bg-red-900/30',
+  },
+  cyan: {
+    badge: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
+    icon: 'bg-cyan-500',
+    card: 'bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100/80 dark:hover:bg-cyan-900/30',
+  },
+  green: {
+    badge: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+    icon: 'bg-green-500',
+    card: 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100/80 dark:hover:bg-green-900/30',
+  },
+  indigo: {
+    badge: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
+    icon: 'bg-indigo-500',
+    card: 'bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100/80 dark:hover:bg-indigo-900/30',
+  },
+  yellow: {
+    badge: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
+    icon: 'bg-yellow-500',
+    card: 'bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100/80 dark:hover:bg-yellow-900/30',
+  },
+};
+
+// Flatten all projects with their category info
+const allProjects = DOCUMENTATION_CATEGORIES.flatMap((category) =>
+  category.projects.map((project) => ({
+    ...project,
+    categoryKey: category.titleKey,
+    categoryColor: category.color,
+  }))
+);
+---
+
+<div
+  class="w-full px-4 sm:px-6 lg:px-8 xl:px-8 2xl:px-12 3xl:px-16 py-6 sm:py-8 min-h-[calc(100vh-200px)] flex flex-col"
+>
+  <div class="mb-6">
+    <div class="rounded-xl border-0 p-5 sm:p-6 bg-indigo-50 dark:bg-indigo-900/20">
+      <div class="flex items-start gap-4">
+        <div
+          class="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 inline-flex items-center justify-center bg-indigo-600 text-white rounded-xl"
+        >
+          <Icon name="book" class="w-7 h-7 sm:w-8 sm:h-8" strokeWidth={1.5} />
+        </div>
+        <div class="min-w-0 flex-1">
+          <h1 class="text-2xl sm:text-3xl font-semibold text-indigo-600 dark:text-indigo-400">
+            {t('docs.title')}
+          </h1>
+          <p class="text-base sm:text-lg text-neutral-600 dark:text-neutral-300 line-clamp-2">
+            {t('docs.subtitle')}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="sr-only">{t('docs.technologies')}</h2>
+  <div class={`${GRIDS.cards.responsiveFour} ${GRIDS.gap.sm}`}>
+    {
+      allProjects.map((project) => (
+        <a
+          href={project.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class={`group relative rounded-xl p-4 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden ${colorStyles[project.categoryColor]?.card || 'bg-neutral-100 dark:bg-neutral-700/50'}`}
+        >
+          <div
+            class={`absolute inset-0 ${colorStyles[project.categoryColor]?.icon || 'bg-blue-500'} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
+          />
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-12 h-12 rounded-xl bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center p-2 group-hover:scale-105 transition-transform duration-300">
+              <img
+                src={`${APP_CONFIG.basePath}${project.logo}`}
+                alt={`${project.name} logo`}
+                width="48"
+                height="48"
+                loading="lazy"
+                decoding="async"
+                class="w-full h-full object-contain"
+              />
+            </div>
+            <span
+              class={`text-base font-semibold px-2.5 py-1 rounded-md ${colorStyles[project.categoryColor]?.badge || 'bg-blue-100 text-blue-600'}`}
+            >
+              {t(project.categoryKey)}
+            </span>
+          </div>
+          <div class="relative">
+            <h3 class="text-base font-semibold text-neutral-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex items-center gap-2">
+              {project.name}
+              <Icon
+                name="externalLink"
+                size="sm"
+                class="text-neutral-400 group-hover:text-blue-500 transition-colors opacity-0 group-hover:opacity-100"
+              />
+            </h3>
+            <p class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed line-clamp-2">
+              {t(project.descKey)}
+            </p>
+          </div>
+          <div
+            class={`absolute bottom-0 left-0 right-0 h-0.5 ${colorStyles[project.categoryColor]?.icon || 'bg-blue-500'} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left`}
+          />
+        </a>
+      ))
+    }
+  </div>
+
+  <div class="flex-grow"></div>
+
+  <div class="mt-6 pt-4 border-t border-neutral-200 dark:border-neutral-700 text-center">
+    <Button
+      href="https://landscape.cncf.io/"
+      target="_blank"
+      variant="primary"
+      size="md"
+      class="bg-blue-600 hover:bg-blue-700 hover:shadow-lg"
+    >
+      <Icon name="globe" size="lg" />
+      <span>{t('docs.exploreLandscape')}</span>
+      <Icon name="externalLink" size="md" />
+    </Button>
+  </div>
+</div>

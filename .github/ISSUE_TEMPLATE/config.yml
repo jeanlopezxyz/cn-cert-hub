@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & Discussions
+    url: https://github.com/jeanlopezxyz/cn-cert-hub/discussions
+    about: Ask questions or start discussions here instead of opening an issue
+  - name: Contributing Guide
+    url: https://github.com/jeanlopezxyz/cn-cert-hub/blob/main/CONTRIBUTING.md
+    about: Learn how to contribute questions, resources, and translations
+  - name: Quick Start
+    url: https://github.com/jeanlopezxyz/cn-cert-hub/blob/main/ONBOARDING.md
+    about: Get started contributing in under 10 minutes

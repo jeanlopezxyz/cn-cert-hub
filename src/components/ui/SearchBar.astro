@@ -1,0 +1,483 @@
+---
+import { CERTIFICATIONS } from '@/data/certifications';
+import { useTranslations } from '@/i18n/utils';
+import { CERTIFICATION_CATEGORIES } from '@/app';
+import Icon from '@/components/ui/Icon.astro';
+import { SEARCH_ICONS, buildLocalizedPath, getLevelBadgeClass } from '@/utils';
+
+interface Props {
+  lang: 'en' | 'es' | 'pt';
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// Pre-compute level colors server-side for client use
+const levelColors = {
+  entry: getLevelBadgeClass('entry'),
+  intermediate: getLevelBadgeClass('intermediate'),
+  advanced: getLevelBadgeClass('advanced'),
+};
+
+// Pre-compute certification data for client-side search
+const searchData = CERTIFICATIONS.map((cert) => {
+  const categoryObj = CERTIFICATION_CATEGORIES.find((cat) =>
+    cat.certificationIds.includes(cert.id)
+  );
+  return {
+    id: cert.id,
+    acronym: cert.acronym,
+    name: cert.name,
+    description: cert.description,
+    level: cert.level,
+    url: buildLocalizedPath(`/certifications/${cert.id}`, lang),
+    category: categoryObj ? t(categoryObj.name) : '',
+    domains: cert.domains.map((d) => ({
+      name: d.name,
+      topics: d.topics.map((topic) => (typeof topic === 'string' ? topic : topic.name)),
+    })),
+  };
+});
+
+// Translations for client
+const translations = {
+  placeholder: t('search.placeholder'),
+  results: t('search.results'),
+  ariaSearch: t('aria.search'),
+  ariaCloseSearch: t('aria.closeSearch'),
+  ariaClearSearch: t('aria.clearSearch'),
+  levelEntry: t('certifications.level.entry'),
+  levelIntermediate: t('certifications.level.intermediate'),
+  levelAdvanced: t('certifications.level.advanced'),
+};
+
+// Icon paths for client-side rendering
+const iconPaths = {
+  badgeCheck: SEARCH_ICONS.badgeCheck,
+  chevronRight: SEARCH_ICONS.chevronRight,
+};
+---
+
+<!-- Mobile Search Button -->
+<button
+  id="mobile-search-btn"
+  class="sm:hidden inline-flex items-center justify-center w-[37.5px] h-[37.5px] text-neutral-600 dark:text-neutral-400 bg-transparent rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-200"
+  aria-label={translations.ariaSearch}
+>
+  <Icon name="search" size="md" strokeWidth={1.5} />
+</button>
+
+<!-- Search Container -->
+<div id="search-container" class="hidden sm:block sm:relative sm:w-full sm:max-w-md sm:mx-auto">
+  <!-- Mobile Backdrop -->
+  <div
+    id="search-backdrop"
+    class="hidden sm:hidden fixed inset-0 bg-black/50 -z-10 transition-opacity duration-200"
+    aria-hidden="true"
+  >
+  </div>
+
+  <!-- Mobile Search Header -->
+  <div
+    id="mobile-search-header"
+    class="hidden sm:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 shadow-sm transition-all duration-200 z-50"
+  >
+    <div class="h-full flex items-center px-3 gap-2">
+      <button
+        id="close-mobile-search"
+        class="inline-flex items-center justify-center w-10 h-10 text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+        aria-label={translations.ariaCloseSearch}
+      >
+        <Icon name="arrowLeft" size="md" strokeWidth={1.5} />
+      </button>
+      <div class="flex-1 relative">
+        <div
+          class="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 dark:text-neutral-500 z-10"
+        >
+          <Icon name="search" size="sm" strokeWidth={1.5} />
+        </div>
+        <button
+          id="clear-mobile-search"
+          class="hidden absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 z-10"
+          type="button"
+          aria-label={translations.ariaClearSearch}
+        >
+          <Icon name="close" size="sm" strokeWidth={1.5} />
+        </button>
+        <input
+          id="mobile-search-input"
+          type="text"
+          placeholder={translations.placeholder}
+          class="w-full h-10 pl-9 pr-9 rounded-lg text-base border outline-none transition-all duration-200 bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:border-primary-500 dark:focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+          aria-label={translations.ariaSearch}
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop Search -->
+  <div id="desktop-search" class="relative w-full">
+    <div
+      class="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
+    >
+      <Icon name="search" size="md" strokeWidth={1.5} />
+    </div>
+    <button
+      id="clear-desktop-search"
+      class="hidden absolute right-4 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 z-10 transition-colors"
+      type="button"
+      aria-label={translations.ariaClearSearch}
+    >
+      <Icon name="close" size="md" strokeWidth={1.5} />
+    </button>
+    <input
+      id="desktop-search-input"
+      type="text"
+      placeholder={translations.placeholder}
+      class="w-full h-11 pl-12 pr-12 text-sm text-neutral-700 dark:text-neutral-100 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:border-primary-500 dark:focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-200"
+      aria-label={translations.ariaSearch}
+      autocomplete="off"
+      autocapitalize="off"
+      autocorrect="off"
+      spellcheck="false"
+    />
+  </div>
+
+  <!-- Search Suggestions -->
+  <div
+    id="search-suggestions"
+    class="hidden absolute left-0 right-0 top-full mt-3 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-xl shadow-neutral-200/50 dark:shadow-black/30 overflow-hidden z-50"
+  >
+    <div
+      class="px-4 py-2.5 bg-neutral-50 dark:bg-neutral-900/50 border-b border-neutral-200 dark:border-neutral-700"
+    >
+      <p
+        id="results-count"
+        class="text-sm font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide"
+      >
+      </p>
+    </div>
+    <div id="suggestions-list" class="p-2 max-h-80 overflow-y-auto"></div>
+  </div>
+</div>
+
+<!-- Mobile Suggestions (positioned differently) -->
+<div
+  id="mobile-search-suggestions"
+  class="hidden fixed top-16 left-3 right-3 mt-3 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-xl shadow-neutral-200/50 dark:shadow-black/30 overflow-hidden z-50"
+>
+  <div
+    class="px-4 py-2.5 bg-neutral-50 dark:bg-neutral-900/50 border-b border-neutral-200 dark:border-neutral-700"
+  >
+    <p
+      id="mobile-results-count"
+      class="text-sm font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide"
+    >
+    </p>
+  </div>
+  <div id="mobile-suggestions-list" class="p-2 max-h-80 overflow-y-auto"></div>
+</div>
+
+<script
+  is:inline
+  define:vars={{
+    searchData,
+    translations,
+    iconPaths,
+    levelColors,
+  }}
+>
+  // Import search utilities from window (loaded separately)
+  const { calculateFuzzyScore, getScoreThreshold, SEARCH_CONFIG } = window.__searchUtils || {};
+
+  function initSearchBar() {
+    // State
+    let query = '';
+    let suggestions = [];
+    let focusedIndex = -1;
+    let isExpanded = false;
+    let debounceTimer = null;
+
+    // Elements
+    const mobileBtn = document.getElementById('mobile-search-btn');
+    const container = document.getElementById('search-container');
+    const backdrop = document.getElementById('search-backdrop');
+    const mobileHeader = document.getElementById('mobile-search-header');
+    const mobileInput = document.getElementById('mobile-search-input');
+    const desktopInput = document.getElementById('desktop-search-input');
+    const clearMobile = document.getElementById('clear-mobile-search');
+    const clearDesktop = document.getElementById('clear-desktop-search');
+    const closeMobile = document.getElementById('close-mobile-search');
+    const suggestionsEl = document.getElementById('search-suggestions');
+    const suggestionsList = document.getElementById('suggestions-list');
+    const resultsCount = document.getElementById('results-count');
+    const mobileSuggestionsEl = document.getElementById('mobile-search-suggestions');
+    const mobileSuggestionsList = document.getElementById('mobile-suggestions-list');
+    const mobileResultsCount = document.getElementById('mobile-results-count');
+
+    if (!mobileBtn || !container) return;
+
+    // Generate suggestions
+    function generateSuggestions(searchQuery) {
+      if (!searchQuery || searchQuery.length < SEARCH_CONFIG.MIN_QUERY_LENGTH) return [];
+
+      const threshold = getScoreThreshold(searchQuery.length);
+      const q = searchQuery.toLowerCase().trim();
+      const results = [];
+
+      searchData.forEach((cert) => {
+        const scores = {
+          acronym:
+            calculateFuzzyScore(cert.acronym, q) * SEARCH_CONFIG.SCORE_WEIGHTS.ACRONYM_MULTIPLIER,
+          name: calculateFuzzyScore(cert.name, q) * SEARCH_CONFIG.SCORE_WEIGHTS.NAME_MULTIPLIER,
+          description:
+            calculateFuzzyScore(cert.description, q) *
+            SEARCH_CONFIG.SCORE_WEIGHTS.DESCRIPTION_MULTIPLIER,
+          level: calculateFuzzyScore(cert.level, q) * SEARCH_CONFIG.SCORE_WEIGHTS.LEVEL_MULTIPLIER,
+        };
+
+        const maxScore = Math.max(...Object.values(scores));
+
+        if (maxScore > threshold) {
+          results.push({
+            id: cert.id,
+            title: `${cert.acronym} - ${cert.name}`,
+            url: cert.url,
+            score: maxScore,
+            category: cert.category,
+            level: cert.level,
+          });
+        }
+      });
+
+      return results.sort((a, b) => b.score - a.score).slice(0, SEARCH_CONFIG.MAX_SUGGESTIONS);
+    }
+
+    // Render suggestions
+    function renderSuggestions(targetList, targetCount, isMobile) {
+      if (suggestions.length === 0) {
+        if (isMobile) {
+          mobileSuggestionsEl.classList.add('hidden');
+        } else {
+          suggestionsEl.classList.add('hidden');
+        }
+        return;
+      }
+
+      const levelLabels = {
+        entry: translations.levelEntry,
+        intermediate: translations.levelIntermediate,
+        advanced: translations.levelAdvanced,
+      };
+
+      // levelColors is passed via define:vars from server-side getLevelBadgeClass
+
+      targetCount.textContent = `${translations.results} (${suggestions.length})`;
+
+      targetList.innerHTML = suggestions
+        .map(
+          (s, index) => `
+        <div
+          data-url="${s.url}"
+          data-index="${index}"
+          class="search-result w-full text-left px-3 py-3 rounded-lg transition-all duration-200 group cursor-pointer mb-1 last:mb-0 ${
+            index === focusedIndex
+              ? 'bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-800'
+              : 'hover:bg-neutral-50 dark:hover:bg-neutral-700/50 border border-transparent'
+          }"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+              index === focusedIndex
+                ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400'
+                : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400'
+            } transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="${iconPaths.badgeCheck}" />
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="text-base font-semibold truncate ${
+                index === focusedIndex
+                  ? 'text-primary-700 dark:text-primary-300'
+                  : 'text-neutral-800 dark:text-neutral-100'
+              }">${s.title}</div>
+              <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                ${s.level ? `<span class="px-2 py-0.5 text-xs font-semibold uppercase tracking-wide rounded-full ${levelColors[s.level]}">${levelLabels[s.level]}</span>` : ''}
+                ${s.category ? `<span class="px-2 py-0.5 text-xs font-medium bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400 rounded-full">${s.category}</span>` : ''}
+              </div>
+            </div>
+            <div class="flex-shrink-0 text-neutral-400 opacity-0 group-hover:opacity-100 transition-all duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="${iconPaths.chevronRight}" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      `
+        )
+        .join('');
+
+      if (isMobile) {
+        mobileSuggestionsEl.classList.remove('hidden');
+      } else {
+        suggestionsEl.classList.remove('hidden');
+      }
+
+      // Add click handlers
+      targetList.querySelectorAll('.search-result').forEach((el) => {
+        el.addEventListener('click', () => {
+          window.location.href = el.dataset.url;
+        });
+      });
+    }
+
+    // Handle search input
+    function handleSearch(input, isMobile) {
+      query = input.value.trim();
+
+      // Show/hide clear button
+      const clearBtn = isMobile ? clearMobile : clearDesktop;
+      if (query) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+
+      // Debounced search
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        suggestions = generateSuggestions(query);
+        focusedIndex = -1;
+        renderSuggestions(
+          isMobile ? mobileSuggestionsList : suggestionsList,
+          isMobile ? mobileResultsCount : resultsCount,
+          isMobile
+        );
+      }, SEARCH_CONFIG.DEBOUNCE_MS);
+    }
+
+    // Handle keyboard navigation
+    function handleKeyDown(e, isMobile) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeMobileSearch();
+        return;
+      }
+
+      if (suggestions.length === 0) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        focusedIndex = focusedIndex < suggestions.length - 1 ? focusedIndex + 1 : 0;
+        renderSuggestions(
+          isMobile ? mobileSuggestionsList : suggestionsList,
+          isMobile ? mobileResultsCount : resultsCount,
+          isMobile
+        );
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        focusedIndex = focusedIndex > 0 ? focusedIndex - 1 : suggestions.length - 1;
+        renderSuggestions(
+          isMobile ? mobileSuggestionsList : suggestionsList,
+          isMobile ? mobileResultsCount : resultsCount,
+          isMobile
+        );
+      } else if (e.key === 'Enter' && focusedIndex >= 0) {
+        e.preventDefault();
+        window.location.href = suggestions[focusedIndex].url;
+      }
+    }
+
+    // Open mobile search
+    function openMobileSearch() {
+      isExpanded = true;
+      container.classList.remove('hidden');
+      container.classList.add('fixed', 'inset-0', 'z-50');
+      backdrop.classList.remove('hidden');
+      mobileHeader.classList.remove('hidden');
+      document.getElementById('desktop-search').classList.add('hidden');
+      requestAnimationFrame(() => {
+        mobileInput.focus();
+      });
+    }
+
+    // Close mobile search
+    function closeMobileSearch() {
+      isExpanded = false;
+      query = '';
+      suggestions = [];
+      focusedIndex = -1;
+      mobileInput.value = '';
+      desktopInput.value = '';
+      clearMobile.classList.add('hidden');
+      clearDesktop.classList.add('hidden');
+      backdrop.classList.add('hidden');
+      mobileHeader.classList.add('hidden');
+      suggestionsEl.classList.add('hidden');
+      mobileSuggestionsEl.classList.add('hidden');
+      container.classList.add('hidden', 'sm:block');
+      container.classList.remove('fixed', 'inset-0', 'z-50');
+      document.getElementById('desktop-search').classList.remove('hidden');
+    }
+
+    // Event listeners
+    mobileBtn.addEventListener('click', openMobileSearch);
+    closeMobile.addEventListener('click', closeMobileSearch);
+    backdrop.addEventListener('click', closeMobileSearch);
+
+    mobileInput.addEventListener('input', () => handleSearch(mobileInput, true));
+    desktopInput.addEventListener('input', () => handleSearch(desktopInput, false));
+
+    mobileInput.addEventListener('keydown', (e) => handleKeyDown(e, true));
+    desktopInput.addEventListener('keydown', (e) => handleKeyDown(e, false));
+
+    clearMobile.addEventListener('click', () => {
+      mobileInput.value = '';
+      query = '';
+      suggestions = [];
+      clearMobile.classList.add('hidden');
+      mobileSuggestionsEl.classList.add('hidden');
+      mobileInput.focus();
+    });
+
+    clearDesktop.addEventListener('click', () => {
+      desktopInput.value = '';
+      query = '';
+      suggestions = [];
+      clearDesktop.classList.add('hidden');
+      suggestionsEl.classList.add('hidden');
+      desktopInput.focus();
+    });
+
+    // Close on click outside
+    document.addEventListener('click', (e) => {
+      if (
+        !container.contains(e.target) &&
+        !mobileBtn.contains(e.target) &&
+        !mobileSuggestionsEl.contains(e.target)
+      ) {
+        if (isExpanded) {
+          closeMobileSearch();
+        } else {
+          suggestionsEl.classList.add('hidden');
+        }
+      }
+    });
+
+    // Focus handling for desktop
+    desktopInput.addEventListener('focus', () => {
+      if (suggestions.length > 0) {
+        suggestionsEl.classList.remove('hidden');
+      }
+    });
+  }
+
+  // Initialize on load and after navigation
+  initSearchBar();
+  document.addEventListener('astro:after-swap', initSearchBar);
+</script>

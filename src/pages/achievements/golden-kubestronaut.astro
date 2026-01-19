@@ -1,0 +1,164 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { getPageI18n } from '@/i18n';
+import { CERTIFICATIONS } from '@/data/certifications';
+import { KUBESTRONAUT_CERT_IDS, GOLDEN_ADDITIONAL_CERT_IDS } from '@/app';
+import { getAssetPath } from '@/utils';
+import AchievementCertificationGrid from '@/components/achievements/AchievementCertificationGrid.astro';
+import AchievementHero from '@/components/achievements/AchievementHero.astro';
+import AchievementSteps from '@/components/achievements/AchievementSteps.astro';
+import AchievementCTA from '@/components/achievements/AchievementCTA.astro';
+import AchievementInfoCards from '@/components/achievements/AchievementInfoCards.astro';
+import Icon from '@/components/ui/Icon.astro';
+
+const { lang, t, basePath } = getPageI18n(Astro.url);
+
+// All certifications for Golden Kubestronaut
+const kubestronautCerts = [...KUBESTRONAUT_CERT_IDS];
+const additionalCerts = [...GOLDEN_ADDITIONAL_CERT_IDS];
+
+const steps = [
+  {
+    number: 1,
+    title: t('achievements.golden.howStep1Title'),
+    description: t('achievements.golden.howStep1Desc'),
+  },
+  {
+    number: 2,
+    title: t('achievements.golden.howStep2Title'),
+    description: t('achievements.golden.howStep2Desc'),
+  },
+  {
+    number: 3,
+    title: t('achievements.golden.howStep3Title'),
+    description: t('achievements.golden.howStep3Desc'),
+  },
+];
+
+const requirements = [
+  t('achievements.golden.req1'),
+  t('achievements.golden.req2'),
+  t('achievements.golden.req3'),
+];
+
+const benefits = [
+  t('achievements.golden.benefit1'),
+  t('achievements.golden.benefit2'),
+  t('achievements.golden.benefit3'),
+  t('achievements.golden.benefit4'),
+  t('achievements.golden.benefit5'),
+  t('achievements.golden.benefit6'),
+  t('achievements.golden.benefit7'),
+];
+---
+
+<Layout
+  title={t('achievements.golden.title')}
+  description={t('meta.goldenKubestronaut')}
+  lang={lang}
+  showSidebar={true}
+>
+  <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-8 2xl:px-12 3xl:px-16 py-6 sm:py-8">
+    <!-- Hero Section - Refactored Component -->
+    <AchievementHero
+      title={t('achievements.golden.title')}
+      description={t('achievements.golden.description')}
+      iconSrc={getAssetPath('/golden-kubestronaut-icon.svg')}
+      certCount={15}
+      certCountLabel={t('certifications.card.certifications')}
+      certRequiredLabel={t('certifications.card.required')}
+      gradientClass="bg-gradient-to-br from-amber-400 via-yellow-500 to-orange-500 dark:from-[#D97706] dark:via-[#F59E0B] dark:to-[#EAB308]"
+      particleStyle="golden"
+      ctaText={t('achievements.golden.heroCta')}
+      ctaHref={`${basePath}/certifications/kcna`}
+      secondaryCtaText={t('achievements.golden.heroCtaSecondary')}
+      secondaryCtaHref="https://www.cncf.io/training/kubestronaut/"
+    />
+
+    <!-- Upcoming Change Notice -->
+    <div
+      class="card rounded-xl overflow-hidden border-0 bg-blue-50 dark:bg-blue-600/20 mb-6 sm:mb-8"
+    >
+      <div class="card-body p-4 sm:p-5">
+        <div class="flex items-start gap-3">
+          <div
+            class="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 inline-flex items-center justify-center bg-blue-600 text-white rounded-xl"
+          >
+            <Icon name="infoCircle" size="xl" filled />
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-blue-600 dark:text-blue-400 mb-1">
+              {t('achievements.golden.upcomingTitle')}
+            </h3>
+            <p class="text-neutral-600 dark:text-neutral-300 text-base leading-relaxed">
+              {t('achievements.golden.upcomingDesc')}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kubestronaut Certifications -->
+    <div class="mb-6 sm:mb-8">
+      <h2 class="text-xl sm:text-2xl font-bold mb-4 text-neutral-600 dark:text-neutral-300">
+        {t('achievements.golden.step1Title')}
+      </h2>
+      <AchievementCertificationGrid
+        certIds={kubestronautCerts}
+        certifications={CERTIFICATIONS}
+        basePath={basePath}
+        lang={lang}
+        aria-label={t('achievements.golden.step1Title')}
+        variant="kubestronaut"
+      />
+    </div>
+
+    <!-- Additional CNCF Certifications -->
+    <div class="mb-6 sm:mb-8">
+      <h2 class="text-xl sm:text-2xl font-bold mb-4 text-neutral-600 dark:text-neutral-300">
+        {t('achievements.golden.step2Title')}
+      </h2>
+      <AchievementCertificationGrid
+        certIds={additionalCerts}
+        certifications={CERTIFICATIONS}
+        basePath={basePath}
+        lang={lang}
+        aria-label={t('achievements.golden.step2Title')}
+        variant="cncf"
+      />
+    </div>
+
+    <!-- LFCS Certification -->
+    <div class="mb-6 sm:mb-8">
+      <h2 class="text-xl sm:text-2xl font-bold mb-4 text-neutral-600 dark:text-neutral-300">
+        {t('achievements.golden.step3Title')}
+      </h2>
+      <AchievementCertificationGrid
+        certIds={['lfcs']}
+        certifications={CERTIFICATIONS}
+        basePath={basePath}
+        lang={lang}
+        aria-label={t('achievements.golden.step3Title')}
+        variant="cncf"
+      />
+    </div>
+
+    <!-- Info Cards - Requirements & Benefits -->
+    <AchievementInfoCards
+      requirementsTitle={t('achievements.golden.requirements')}
+      requirements={requirements}
+      benefitsTitle={t('achievements.golden.benefits')}
+      benefits={benefits}
+    />
+
+    <!-- How to Get Started - Refactored Component -->
+    <AchievementSteps title={t('achievements.golden.how')} steps={steps} />
+
+    <!-- Call to Action - Refactored Component -->
+    <AchievementCTA
+      text={t('achievements.golden.ctaText')}
+      buttonText={t('achievements.golden.ctaButton')}
+      href={`${basePath}/certifications/kcna`}
+    />
+  </div>
+</Layout>

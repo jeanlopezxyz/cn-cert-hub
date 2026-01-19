@@ -1,0 +1,770 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import { getLangFromUrl, useTranslations, type Language } from '@/i18n/utils';
+import { APP_CONFIG, EXTERNAL_URLS, THEME, PREFS_VERSION, BROWSER, LOADING } from '@/app';
+import Icon from '@/components/ui/Icon.astro';
+import LanguageSelector from '@/components/layout/LanguageSelector.astro';
+import SearchBar from '@/components/ui/SearchBar.astro';
+import Sidebar from '@/components/layout/Sidebar.astro';
+import '@/styles/global.css';
+
+export interface Props {
+  title: string;
+  description?: string;
+  showSidebar?: boolean;
+  lang?: Language;
+  image?: string;
+  type?: 'website' | 'article';
+  noIndex?: boolean;
+  certification?: {
+    id: string;
+    name: string;
+    acronym: string;
+    description: string;
+    provider: string;
+    price: string;
+    duration: string;
+    level: string;
+  };
+}
+
+const {
+  title,
+  description,
+  showSidebar = false,
+  lang: propLang,
+  image,
+  type = 'website',
+  noIndex = false,
+  certification,
+} = Astro.props;
+
+const lang = propLang || getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const finalDescription = description || t('site.description');
+const baseUrl = (import.meta.env.BASE_URL || '/').endsWith('/')
+  ? import.meta.env.BASE_URL
+  : import.meta.env.BASE_URL + '/';
+
+// SEO URLs
+const siteUrl = APP_CONFIG.siteUrl;
+const currentPath = Astro.url.pathname.replace(/^\/+/, '');
+const canonicalURL = new URL(`/${currentPath}`, siteUrl).href.replace(/\/$/, '') || siteUrl;
+
+// Default OG Image (1200x630 for optimal social sharing)
+const ogImage = image || `${siteUrl}/og-image.png`;
+
+// Dynamic current year for footer
+const currentYear = new Date().getFullYear();
+
+// Hreflang URLs
+const pathWithoutLang = currentPath.replace(/^(es|pt)\//, '');
+const hreflangUrls = {
+  en: `${siteUrl}/${pathWithoutLang}`.replace(/\/$/, '') || siteUrl,
+  es: `${siteUrl}/es/${pathWithoutLang}`.replace(/\/$/, ''),
+  pt: `${siteUrl}/pt/${pathWithoutLang}`.replace(/\/$/, ''),
+};
+---
+
+<!doctype html>
+<html lang={lang} transition:animate="none">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Theme initialization - runs on every page load/navigation -->
+    <script is:inline data-astro-rerun define:vars={{ THEME, PREFS_VERSION, BROWSER }}>
+      (function () {
+        // Constants from centralized configuration
+        var THEME_LIGHT = THEME.LIGHT;
+        var DEFAULT_THEME = THEME.DEFAULT;
+        var FIREFOX_UA = BROWSER.FIREFOX_UA;
+
+        var theme;
+        try {
+          // Check if we need to reset preferences to new defaults
+          var storedVersion = localStorage.getItem('prefsVersion');
+          if (storedVersion !== PREFS_VERSION) {
+            // Reset to new defaults: dark theme, collapsed sidebar
+            localStorage.setItem('prefsVersion', PREFS_VERSION);
+            localStorage.setItem('theme', DEFAULT_THEME);
+            localStorage.removeItem('sidebarOpenSections');
+            localStorage.removeItem('sidebarOpenCategories');
+            theme = DEFAULT_THEME;
+          } else {
+            theme = localStorage.getItem('theme');
+            // Default to dark if no preference saved (only light if explicitly set)
+            if (theme !== THEME_LIGHT) {
+              theme = DEFAULT_THEME;
+            }
+          }
+        } catch (e) {
+          theme = DEFAULT_THEME;
+        }
+        document.documentElement.classList.remove('dark', 'light');
+        document.documentElement.classList.add(theme);
+        // Disable backdrop-filter in Firefox to avoid APZ scroll-linked warnings
+        if (navigator.userAgent.indexOf(FIREFOX_UA) > -1) {
+          document.documentElement.classList.add('no-backdrop-filter');
+        }
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Security Headers (meta-based for GitHub Pages compatibility) -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()" />
+
+    <!-- Content Security Policy - Note: frame-ancestors only works via HTTP headers (see public/_headers) -->
+    <!-- CSP handled via HTTP headers in public/_headers for better security -->
+
+    <!-- Primary Meta Tags -->
+    <title>{title} | Cloud Native Certification Resources Hub</title>
+    <meta name="title" content={`${title} | Cloud Native Certification Resources Hub`} />
+    <meta name="description" content={finalDescription} />
+    <meta
+      name="keywords"
+      content="CNCF, Kubernetes, CKA, CKAD, CKS, KCNA, KCSA, certification, cloud native, DevOps, container, exam preparation"
+    />
+    <meta name="author" content="CNCertHub" />
+    <meta name="robots" content={noIndex ? 'noindex, follow' : 'index, follow'} />
+    <meta name="theme-color" content="#1E50D9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Hreflang for International SEO -->
+    <link rel="alternate" hreflang="en" href={hreflangUrls.en} />
+    <link rel="alternate" hreflang="es" href={hreflangUrls.es} />
+    <link rel="alternate" hreflang="pt" href={hreflangUrls.pt} />
+    <link rel="alternate" hreflang="x-default" href={hreflangUrls.en} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={`${title} | CNCertHub`} />
+    <meta property="og:description" content={finalDescription} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="CNCertHub - Study Guides & Exam Preparation" />
+    <meta
+      property="og:locale"
+      content={lang === 'es' ? 'es_ES' : lang === 'pt' ? 'pt_BR' : 'en_US'}
+    />
+    <meta property="og:site_name" content="CNCertHub" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalURL} />
+    <meta name="twitter:title" content={`${title} | CNCertHub`} />
+    <meta name="twitter:description" content={finalDescription} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href={`${baseUrl}favicon.svg`} />
+    <link rel="apple-touch-icon" sizes="180x180" href={`${baseUrl}apple-touch-icon.png`} />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href={`${baseUrl}manifest.json`} />
+
+    <!-- View Transitions with instant swap -->
+    <ClientRouter />
+
+    <!-- Performance: DNS Prefetch for external resources -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+
+    <!-- Optimized font loading: preconnect + preload + display=swap for best performance -->
+    <!-- Preconnect establishes early connections to font servers -->
+    <link rel="preconnect" href={EXTERNAL_URLS.fonts.googleapis} />
+    <link rel="preconnect" href={EXTERNAL_URLS.fonts.gstatic} crossorigin />
+
+    <!-- Preload critical font CSS for faster LCP -->
+    <link rel="preload" href={EXTERNAL_URLS.fonts.googleFontsCss} as="style" />
+
+    <!-- Load Google Fonts CSS with display=swap for faster rendering -->
+    <!-- Using variable fonts reduces HTTP requests and provides smooth weight transitions -->
+    <link
+      href={EXTERNAL_URLS.fonts.googleFontsCss}
+      rel="stylesheet"
+      media="print"
+      onload={"this.media='all'"}
+    />
+    <noscript><link href={EXTERNAL_URLS.fonts.googleFontsCss} rel="stylesheet" /></noscript>
+
+    <!-- Note: Astro automatically handles preloading of compiled assets -->
+
+    <!-- Critical anti-flash CSS - Minimal inline styles for instant render -->
+    <style is:global>
+      /* Theme colors - Clean white palette */
+      :root {
+        color-scheme: light dark;
+        --bg-primary: #ffffff; /* white - clean background */
+        --text-primary: #0f172a;
+      }
+
+      .dark {
+        --bg-primary: #1e293b; /* neutral-800 - main content area */
+        --text-primary: #f1f5f9;
+      }
+
+      /* Prevent white flash - set background immediately */
+      html,
+      body {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+      }
+
+      /* COMPLETELY DISABLE View Transitions animations - highest specificity */
+      ::view-transition-group(*),
+      ::view-transition-old(*),
+      ::view-transition-new(*) {
+        animation: none !important;
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+      }
+
+      /* Override Astro's generated transition animations */
+      ::view-transition-old(astro-smooz4hq-1),
+      ::view-transition-new(astro-smooz4hq-1) {
+        animation: none !important;
+        animation-duration: 0s !important;
+      }
+
+      /* Set explicit background during view transition - use dark color by default */
+      ::view-transition,
+      ::view-transition-group(root),
+      ::view-transition-image-pair(root) {
+        background-color: #1e293b !important; /* dark mode color */
+      }
+
+      /* Override for light mode */
+      html:not(.dark) ::view-transition,
+      html:not(.dark) ::view-transition-group(root),
+      html:not(.dark) ::view-transition-image-pair(root),
+      html.light ::view-transition,
+      html.light ::view-transition-group(root),
+      html.light ::view-transition-image-pair(root) {
+        background-color: #ffffff !important; /* light mode color - white */
+      }
+
+      /* Hide old snapshot immediately, show new one instantly */
+      ::view-transition-old(root) {
+        display: none !important;
+        opacity: 0 !important;
+      }
+      ::view-transition-new(root) {
+        animation: none !important;
+        opacity: 1 !important;
+      }
+    </style>
+
+    <!-- Apply theme before View Transition swap to prevent flash -->
+    <script is:inline define:vars={{ THEME }}>
+      (function () {
+        // Constants from centralized configuration
+        var THEME_LIGHT = THEME.LIGHT;
+        var DEFAULT_THEME = THEME.DEFAULT;
+
+        function getTheme() {
+          try {
+            var t = localStorage.getItem('theme');
+            if (t === THEME_LIGHT) return THEME_LIGHT;
+          } catch (e) {}
+          // Default to dark
+          return DEFAULT_THEME;
+        }
+
+        document.addEventListener('astro:before-swap', function (event) {
+          var theme = getTheme();
+          event.newDocument.documentElement.classList.remove('dark', 'light');
+          event.newDocument.documentElement.classList.add(theme);
+        });
+      })();
+    </script>
+
+    <!-- Structured Data - JSON-LD -->
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Cloud Native Certification Resources Hub',
+        description: finalDescription,
+        url: siteUrl,
+        inLanguage: [lang, 'en', 'es', 'pt'],
+        publisher: {
+          '@type': 'Organization',
+          name: 'CNCertHub',
+          logo: {
+            '@type': 'ImageObject',
+            url: `${siteUrl}/favicon.svg`,
+          },
+        },
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: `${siteUrl}/?q={search_term_string}`,
+          'query-input': 'required name=search_term_string',
+        },
+      })}
+    />
+
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: siteUrl,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: title,
+            item: canonicalURL,
+          },
+        ],
+      })}
+    />
+
+    {/* Certification Schema - EducationalOccupationalCredential */}
+    {
+      certification && (
+        <script
+          is:inline
+          type="application/ld+json"
+          set:html={JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'EducationalOccupationalCredential',
+            name: `${certification.acronym} - ${certification.name}`,
+            description: certification.description,
+            credentialCategory: 'Professional Certification',
+            educationalLevel: certification.level,
+            competencyRequired: certification.name,
+            recognizedBy: {
+              '@type': 'Organization',
+              name: certification.provider,
+              url:
+                certification.provider === 'CNCF'
+                  ? 'https://www.cncf.io'
+                  : certification.provider === 'Linux Foundation'
+                    ? 'https://www.linuxfoundation.org'
+                    : undefined,
+            },
+            offers: {
+              '@type': 'Offer',
+              price: certification.price.replace(/[^0-9]/g, ''),
+              priceCurrency: 'USD',
+              availability: 'https://schema.org/InStock',
+            },
+            timeToComplete: certification.duration,
+            url: canonicalURL,
+          })}
+        />
+      )
+    }
+
+    <!-- Search utilities script - loaded globally for SearchBar component -->
+    <script is:inline src="/scripts/search-utils.js"></script>
+  </head>
+  <body class="min-h-screen">
+    <!-- Navigation Loading Indicator -->
+    <div
+      id="nav-loading"
+      class="fixed top-0 left-0 right-0 z-[100] pointer-events-none opacity-0 transition-opacity duration-150"
+      aria-hidden="true"
+    >
+      <div
+        id="nav-loading-bar"
+        class="h-[3px] bg-primary-500 transition-[width] duration-300 ease-out"
+        style="width: 0%"
+      >
+      </div>
+    </div>
+
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 bg-blue-600 text-white p-2 z-50 rounded-br-md focus:outline-none focus:ring-2 focus:ring-blue-400 font-medium"
+      tabindex="0"
+    >
+      {t('accessibility.skipToMain')}
+    </a>
+
+    <!-- WowDash-style Header -->
+    <header
+      transition:persist={`header-${lang}`}
+      transition:animate="none"
+      class={`header-persistent fixed top-0 z-50 bg-white dark:bg-neutral-900 border-b border-slate-200 dark:border-neutral-800 transition-all duration-300 left-0 right-0 ${showSidebar ? 'lg:left-[280px]' : ''}`}
+    >
+      <div class="h-16 px-4 flex items-center">
+        {/* Left: Mobile Menu Button + Logo (mobile only) */}
+        <div class="flex items-center gap-2 flex-shrink-0">
+          {
+            showSidebar && (
+              <button
+                id="mobile-menu-btn"
+                class="lg:hidden inline-flex items-center justify-center w-10 h-10 text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-all duration-200"
+                aria-label="Toggle menu"
+              >
+                <Icon name="menu" size="lg" />
+              </button>
+            )
+          }
+
+          {/* Logo text - visible on mobile only (hidden on lg when sidebar shows logo) */}
+          <a
+            href={`${baseUrl}${lang === 'en' ? '' : lang + '/'}`}
+            class="lg:hidden flex items-center"
+          >
+            <span class="text-2xl font-bold text-neutral-900 dark:text-white">CN</span>
+            <span class="text-2xl font-bold text-primary-600">Cert</span>
+            <span class="text-2xl font-bold text-neutral-900 dark:text-white">Hub</span>
+          </a>
+        </div>
+
+        {/* Center/Right: Search Bar - right-aligned on mobile, centered on desktop */}
+        <div class="flex flex-1 justify-end sm:justify-center">
+          <div class="sm:w-full sm:max-w-md sm:mx-2">
+            <SearchBar lang={lang} />
+          </div>
+        </div>
+
+        {/* Right: Actions */}
+        <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+          <!-- Theme Toggle - Disabled (dark mode only) -->
+          <!-- <ThemeToggle /> -->
+
+          <!-- Language Selector -->
+          <LanguageSelector currentLang={lang} />
+
+          <!-- GitHub Link -->
+          <a
+            href={EXTERNAL_URLS.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hidden sm:inline-flex items-center justify-center w-10 h-10 text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-all duration-200"
+            aria-label="GitHub Repository"
+          >
+            <Icon name="github" size="lg" />
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile Menu Toggle Script - Pure DOM approach for resilience -->
+    <script is:inline data-astro-rerun>
+      (function () {
+        // Prevent duplicate listeners
+        if (window._mobileMenuInitialized) return;
+        window._mobileMenuInitialized = true;
+
+        // Toggle mobile sidebar - uses body class for state
+        function toggleMobileSidebar() {
+          document.body.classList.toggle('mobile-sidebar-open');
+        }
+
+        // Close mobile sidebar
+        function closeMobileSidebar() {
+          document.body.classList.remove('mobile-sidebar-open');
+        }
+
+        // Setup click handler using event delegation (more resilient)
+        function handleClick(e) {
+          // Check if click is on hamburger button or its children
+          var btn = e.target.closest('#mobile-menu-btn');
+          if (btn) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleMobileSidebar();
+            return;
+          }
+
+          // Check if click is on mobile backdrop
+          var backdrop = e.target.closest('[data-mobile-backdrop]');
+          if (backdrop) {
+            closeMobileSidebar();
+            return;
+          }
+
+          // Check if click is on sidebar close button
+          var closeBtn = e.target.closest('[data-sidebar-close]');
+          if (closeBtn) {
+            closeMobileSidebar();
+            return;
+          }
+
+          // Check if click is on sidebar link (close after navigation)
+          var sidebarLink = e.target.closest('.sidebar-nav-link');
+          if (sidebarLink) {
+            closeMobileSidebar();
+          }
+        }
+
+        // Use single document-level listener (survives View Transitions)
+        document.addEventListener('click', handleClick, true);
+
+        // Also add direct listener to hamburger button as fallback
+        document.addEventListener('DOMContentLoaded', function () {
+          var menuBtn = document.getElementById('mobile-menu-btn');
+          if (menuBtn) {
+            menuBtn.addEventListener('click', function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleMobileSidebar();
+            });
+          }
+        });
+
+        // Close sidebar on navigation
+        document.addEventListener('astro:before-swap', closeMobileSidebar);
+
+        // Expose for external use
+        window.toggleMobileSidebar = toggleMobileSidebar;
+        window.closeMobileSidebar = closeMobileSidebar;
+      })();
+    </script>
+
+    <div class="min-h-screen">
+      {
+        showSidebar && (
+          <div
+            transition:persist={`sidebar-${lang}`}
+            transition:animate="none"
+            class="sidebar-persistent"
+          >
+            {/* Static sidebar shell - visible immediately while React loads */}
+            <aside
+              id="sidebar-placeholder"
+              class="fixed top-0 h-screen z-40 w-[280px] bg-white dark:bg-neutral-900 hidden lg:block"
+            >
+              <div class="h-16 px-5 flex items-center border-b border-neutral-200 dark:border-neutral-800 lg:border-0">
+                <span class="text-3xl font-bold text-neutral-900 dark:text-white">CN</span>
+                <span class="text-3xl font-bold text-primary-600">Cert</span>
+                <span class="text-3xl font-bold text-neutral-900 dark:text-white">Hub</span>
+              </div>
+            </aside>
+            <Sidebar lang={lang} />
+          </div>
+        )
+      }
+
+      <div
+        class={`flex flex-col min-h-screen pt-16 transition-all duration-300 ${showSidebar ? 'lg:ml-[280px]' : ''}`}
+        id="main-wrapper"
+        data-sidebar={showSidebar}
+      >
+        <main
+          class="flex-grow pb-16"
+          id="main-content"
+          role="main"
+          aria-label={t('accessibility.mainContent')}
+        >
+          <slot />
+        </main>
+
+        <footer
+          transition:persist={`footer-${lang}`}
+          class="relative bg-white dark:bg-neutral-900 border-t border-slate-200 dark:border-neutral-800 mt-8"
+          id="footer"
+        >
+          <div class="w-full px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+              {/* Description */}
+              <div class="flex flex-col sm:flex-row items-center gap-4">
+                <div class="flex items-center">
+                  <span class="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white"
+                    >CN</span
+                  >
+                  <span class="text-xl sm:text-2xl font-bold text-primary-600 dark:text-primary-400"
+                    >Cert</span
+                  >
+                  <span class="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white"
+                    >Hub</span
+                  >
+                </div>
+                <div class="hidden sm:block w-px h-8 bg-neutral-300 dark:bg-neutral-600"></div>
+                <p
+                  class="text-neutral-900 dark:text-neutral-100 text-base text-center sm:text-left max-w-md"
+                >
+                  {t('footer.disclaimer')}
+                </p>
+              </div>
+
+              {/* Links */}
+              <a
+                href="https://blog.labjp.xyz"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group inline-flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-emerald-500/10 transition-colors duration-200"
+                aria-label="labjp.xyz"
+              >
+                <span class="text-emerald-500 font-mono text-base font-bold">&gt;_</span>
+                <span
+                  class="text-emerald-500 font-mono text-base font-bold tracking-wide group-hover:text-emerald-400 transition-colors duration-200"
+                  >labjp.xyz</span
+                >
+                <Icon
+                  name="externalLink"
+                  size="sm"
+                  class="text-emerald-500 group-hover:text-emerald-400 transition-colors duration-200"
+                />
+              </a>
+            </div>
+
+            {/* Copyright */}
+            <div class="mt-6 pt-6 border-t border-slate-200 dark:border-neutral-800 text-center">
+              <p class="text-sm text-neutral-500 dark:text-neutral-400">
+                © {currentYear} CNCertHub. {t('footer.rights')}
+              </p>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <script>
+      // Final fallback to ensure content is visible
+      setTimeout(() => {
+        if (!document.documentElement.classList.contains('visible')) {
+          document.documentElement.classList.add('visible');
+        }
+      }, 1000);
+    </script>
+
+    <!-- Navigation Loading Indicator Script -->
+    <script is:inline define:vars={{ LOADING }}>
+      (function () {
+        if (window._navLoadingInitialized) return;
+        window._navLoadingInitialized = true;
+
+        // Constants from centralized configuration
+        var LOADING_DELAY_MS = LOADING.DELAY_MS;
+        var LOADING_DURATION_MS = LOADING.DURATION_MS;
+        var LOADING_MAX_PROGRESS = LOADING.MAX_PROGRESS;
+        var COMPLETE_PROGRESS = LOADING.COMPLETE_PROGRESS;
+        var FADE_OUT_DELAY_MS = LOADING.FADE_OUT_DELAY_MS;
+        var RESET_DELAY_MS = LOADING.RESET_DELAY_MS;
+
+        var showTimeout = null;
+        var animationFrame = null;
+        var isNavigating = false;
+        var isVisible = false;
+        var progress = 0;
+        var startTime = 0;
+
+        // Easing function for natural deceleration
+        function easeOutQuad(t) {
+          return t * (2 - t);
+        }
+
+        function animateProgress() {
+          if (!isNavigating || !isVisible) return;
+
+          var loadingEl = document.getElementById('nav-loading');
+          var barEl = document.getElementById('nav-loading-bar');
+          if (!loadingEl || !barEl) return;
+
+          var elapsed = Date.now() - startTime;
+          var t = Math.min(elapsed / LOADING_DURATION_MS, 1);
+
+          // Use easing for natural feel - fast start, slow approach to max progress
+          progress = easeOutQuad(t) * LOADING_MAX_PROGRESS;
+          barEl.style.width = progress + '%';
+
+          if (t < 1 && isNavigating) {
+            animationFrame = requestAnimationFrame(animateProgress);
+          }
+        }
+
+        function showLoading() {
+          isNavigating = true;
+          // Only show loading bar after delay
+          showTimeout = setTimeout(function () {
+            if (!isNavigating) return;
+
+            var loadingEl = document.getElementById('nav-loading');
+            var barEl = document.getElementById('nav-loading-bar');
+            if (!loadingEl || !barEl) return;
+
+            isVisible = true;
+            progress = 0;
+            startTime = Date.now();
+            barEl.style.width = '0%';
+            loadingEl.style.opacity = '1';
+
+            // Start smooth animation
+            animationFrame = requestAnimationFrame(animateProgress);
+          }, LOADING_DELAY_MS);
+        }
+
+        function hideLoading() {
+          isNavigating = false;
+
+          if (showTimeout) {
+            clearTimeout(showTimeout);
+            showTimeout = null;
+          }
+
+          if (animationFrame) {
+            cancelAnimationFrame(animationFrame);
+            animationFrame = null;
+          }
+
+          var loadingEl = document.getElementById('nav-loading');
+          var barEl = document.getElementById('nav-loading-bar');
+          if (!loadingEl || !barEl) return;
+
+          if (isVisible) {
+            // Complete to 100% smoothly
+            barEl.style.width = COMPLETE_PROGRESS + '%';
+
+            setTimeout(function () {
+              loadingEl.style.opacity = '0';
+              setTimeout(function () {
+                barEl.style.width = '0%';
+                isVisible = false;
+                progress = 0;
+              }, RESET_DELAY_MS);
+            }, FADE_OUT_DELAY_MS);
+          }
+        }
+
+        document.addEventListener('astro:before-preparation', showLoading);
+        document.addEventListener('astro:after-swap', hideLoading);
+        document.addEventListener('astro:page-load', hideLoading);
+      })();
+    </script>
+
+    <!-- Service Worker Registration for PWA -->
+    <script is:inline>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function (err) {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+        });
+      }
+    </script>
+
+    <!-- Global Error Handler -->
+    <script is:inline>
+      window.onerror = function (msg, url, lineNo, columnNo, error) {
+        console.error('Global error:', { msg, url, lineNo, columnNo, error });
+        return false;
+      };
+      window.onunhandledrejection = function (event) {
+        console.error('Unhandled promise rejection:', event.reason);
+      };
+    </script>
+  </body>
+</html>

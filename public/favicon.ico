@@ -1,0 +1,21 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+  <!-- Background: rounded square for crisp display at small sizes -->
+  <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#g)"/>
+
+  <!-- Astronaut (minimal for 16–32px legibility) -->
+  <!-- Helmet ring -->
+  <circle cx="16" cy="13" r="7" fill="none" stroke="#fff" stroke-width="2"/>
+  <!-- Visor -->
+  <circle cx="16" cy="13" r="4.2" fill="#fff" opacity="0.95"/>
+  <!-- Body -->
+  <rect x="12.5" y="18" width="7" height="7" rx="3.5" fill="#fff"/>
+  <!-- Arms -->
+  <circle cx="10.5" cy="19.5" r="2" fill="#fff"/>
+  <circle cx="21.5" cy="19.5" r="2" fill="#fff"/>
+</svg>

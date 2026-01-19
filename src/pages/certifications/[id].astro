@@ -1,0 +1,65 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import CertificationStudyGuide from '@/components/certifications/CertificationStudyGuide.astro';
+import { CERTIFICATIONS } from '@/data/certifications';
+import { getPageI18n } from '@/i18n';
+import type { Certification } from '@/types/certification';
+
+export async function getStaticPaths() {
+  return CERTIFICATIONS.map((cert) => ({
+    params: { id: cert.id },
+    props: { certification: cert },
+  }));
+}
+
+const { certification } = Astro.props;
+const { lang } = getPageI18n(Astro.url);
+
+// Constants
+const LINUX_FOUNDATION_ID = 'lfcs';
+const PROVIDER_LINUX_FOUNDATION = 'Linux Foundation';
+const PROVIDER_CNCF = 'CNCF';
+
+/**
+ * Determine certification provider based on ID
+ */
+function getCertificationProvider(cert: Certification): string {
+  return cert.id === LINUX_FOUNDATION_ID ? PROVIDER_LINUX_FOUNDATION : PROVIDER_CNCF;
+}
+
+/**
+ * Build certification schema for structured data
+ */
+function buildCertificationSchema(cert: Certification, provider: string) {
+  return {
+    id: cert.id,
+    name: cert.name,
+    acronym: cert.acronym,
+    description: cert.description,
+    provider,
+    price: `$${cert.price}`,
+    duration: `${cert.duration} minutes`,
+    level: cert.level,
+  };
+}
+
+/**
+ * Generate SEO-optimized meta description
+ */
+function buildMetaDescription(cert: Certification): string {
+  return `${cert.acronym} (${cert.name}) certification guide. ${cert.duration}-minute ${cert.type} exam, $${cert.price}. Free study resources, practice questions, and exam tips.`;
+}
+
+const provider = getCertificationProvider(certification);
+const certificationSchema = buildCertificationSchema(certification, provider);
+const metaDescription = buildMetaDescription(certification);
+---
+
+<Layout
+  title={certification.name}
+  description={metaDescription}
+  showSidebar={true}
+  certification={certificationSchema}
+>
+  <CertificationStudyGuide certification={certification} lang={lang} />
+</Layout>

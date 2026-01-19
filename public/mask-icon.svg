@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 32 32">
+  <!-- Safari pinned tab uses the alpha channel of this mask. Keep it 1-color. -->
+  <g fill="#000">
+    <!-- Helmet ring (thicker for mask) -->
+    <circle cx="16" cy="13" r="7.5"/>
+    <!-- Cut a visor hole by overlay (simulate by smaller circle in white if needed by consumer). For mask, solid is fine. -->
+    <!-- Body and arms as unified silhouette -->
+    <rect x="11" y="18" width="10" height="8" rx="4"/>
+    <circle cx="9.5" cy="20.5" r="2.2"/>
+    <circle cx="22.5" cy="20.5" r="2.2"/>
+  </g>
+</svg>

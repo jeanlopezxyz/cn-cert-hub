@@ -1,0 +1,70 @@
+---
+/**
+ * IconBox Component
+ * Reusable icon container with consistent sizing and styling
+ */
+import Icon from './Icon.astro';
+import type { IconName } from '@/utils';
+
+export interface Props {
+  /**
+   * Icon name to display
+   */
+  name: IconName;
+  /**
+   * Size variant
+   * @default 'md'
+   */
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  /**
+   * Background color classes
+   * @default 'bg-primary-600'
+   */
+  bgColor?: string;
+  /**
+   * Icon color classes
+   * @default 'text-white'
+   */
+  iconColor?: string;
+  /**
+   * Border radius variant
+   * @default 'rounded-xl'
+   */
+  rounded?: 'rounded-lg' | 'rounded-xl' | 'rounded-2xl' | 'rounded-full';
+  /**
+   * Icon stroke width
+   * @default 2
+   */
+  strokeWidth?: number;
+  /**
+   * Additional CSS classes
+   */
+  class?: string;
+}
+
+const {
+  name,
+  size = 'md',
+  bgColor = 'bg-primary-600',
+  iconColor = 'text-white',
+  rounded = 'rounded-xl',
+  strokeWidth = 2,
+  class: className,
+} = Astro.props;
+
+// Size mappings: container size + icon size
+const sizes = {
+  sm: { container: 'w-8 h-8', icon: 'w-4 h-4' },
+  md: { container: 'w-10 h-10', icon: 'w-5 h-5' },
+  lg: { container: 'w-12 h-12', icon: 'w-6 h-6' },
+  xl: { container: 'w-14 h-14 sm:w-16 sm:h-16', icon: 'w-7 h-7 sm:w-8 sm:h-8' },
+} as const;
+
+const { container, icon } = sizes[size];
+---
+
+<div
+  class={`${container} ${bgColor} ${rounded} flex items-center justify-center flex-shrink-0 ${className ?? ''}`}
+>
+  <Icon name={name} class={`${icon} ${iconColor}`} strokeWidth={strokeWidth} />
+</div>

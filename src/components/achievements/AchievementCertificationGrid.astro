@@ -1,0 +1,94 @@
+---
+import { getLangFromUrl, useTranslations } from '@/i18n/utils';
+import { getLevelColors } from '@/utils';
+import type { Language, Certification } from '@/types';
+import { CARDS } from '@/app';
+import Icon from '@/components/ui/Icon.astro';
+
+interface Props {
+  certIds: string[];
+  certifications: Certification[];
+  basePath: string;
+  lang?: Language;
+  gridClass?: string;
+  role?: 'list' | 'group' | 'none';
+  'aria-label'?: string;
+  variant?: 'kubestronaut' | 'cncf';
+}
+
+const {
+  certIds,
+  certifications,
+  basePath,
+  lang: propLang,
+  gridClass = 'grid-cols-2 sm:grid-cols-3 md:grid-cols-5',
+  role = 'list',
+  'aria-label': ariaLabel,
+  variant = 'kubestronaut',
+} = Astro.props;
+
+const lang = (propLang || getLangFromUrl(Astro.url)) as Language;
+const t = useTranslations(lang);
+
+const getGridClass = () => {
+  if (variant === 'cncf') {
+    return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5';
+  }
+  return gridClass;
+};
+---
+
+<div
+  class={`grid ${getGridClass()} gap-3 sm:gap-4`}
+  role={role === 'list' ? 'list' : role}
+  aria-label={ariaLabel}
+>
+  {
+    certIds.map((certId) => {
+      const cert = certifications.find((c) => c.id === certId);
+      const colors = getLevelColors(cert?.level || 'intermediate');
+
+      const cardContent = (
+        <div class={`card h-full ${CARDS.base} border-0 ${colors.bg}`}>
+          <div class="card-body p-4 sm:p-5 h-full flex flex-col">
+            <div class="flex items-center justify-center gap-2 sm:gap-3 mb-3">
+              <div
+                class={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center ${colors.icon} text-white rounded-xl flex-shrink-0`}
+                aria-hidden="true"
+              >
+                <Icon name="certification" size="xl" strokeWidth={1.5} />
+              </div>
+              <h3 class={`text-lg sm:text-xl font-bold ${colors.text} m-0 leading-none`}>
+                {cert?.acronym}
+              </h3>
+            </div>
+
+            <p class="text-neutral-600 dark:text-neutral-300 text-sm sm:text-base mb-3 text-center">
+              {cert?.name}
+            </p>
+
+            <div class="flex-1" />
+
+            <span
+              class={`text-sm px-3 py-1.5 rounded-lg font-medium whitespace-nowrap ${colors.text} bg-white/60 dark:bg-neutral-900/40 text-center`}
+            >
+              {t(`certifications.level.${cert?.level}`)}
+            </span>
+          </div>
+        </div>
+      );
+
+      const link = (
+        <a
+          href={`${basePath}/certifications/${certId}`}
+          class="group block h-full"
+          aria-label={`${t('certifications.card.viewDetails')}: ${cert?.acronym ?? certId}`}
+        >
+          {cardContent}
+        </a>
+      );
+
+      return role === 'list' ? <div role="listitem">{link}</div> : link;
+    })
+  }
+</div>

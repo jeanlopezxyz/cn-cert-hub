@@ -1,0 +1,103 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { getPageI18n } from '@/i18n';
+import { CERTIFICATIONS } from '@/data/certifications';
+import { KUBESTRONAUT_CERT_IDS } from '@/app';
+import { getAssetPath } from '@/utils';
+import AchievementCertificationGrid from '@/components/achievements/AchievementCertificationGrid.astro';
+import AchievementHero from '@/components/achievements/AchievementHero.astro';
+import AchievementSteps from '@/components/achievements/AchievementSteps.astro';
+import AchievementCTA from '@/components/achievements/AchievementCTA.astro';
+import AchievementInfoCards from '@/components/achievements/AchievementInfoCards.astro';
+
+const { lang, t, basePath } = getPageI18n(Astro.url);
+
+const kubestronautCerts = [...KUBESTRONAUT_CERT_IDS];
+
+const steps = [
+  {
+    number: 1,
+    title: t('achievements.kubestronaut.step1Title'),
+    description: t('achievements.kubestronaut.step1Desc'),
+  },
+  {
+    number: 2,
+    title: t('achievements.kubestronaut.step2Title'),
+    description: t('achievements.kubestronaut.step2Desc'),
+  },
+  {
+    number: 3,
+    title: t('achievements.kubestronaut.step3Title'),
+    description: t('achievements.kubestronaut.step3Desc'),
+  },
+];
+
+const requirements = [t('achievements.kubestronaut.req1'), t('achievements.kubestronaut.req2')];
+
+const benefits = [
+  t('achievements.kubestronaut.benefit1'),
+  t('achievements.kubestronaut.benefit2'),
+  t('achievements.kubestronaut.benefit3'),
+  t('achievements.kubestronaut.benefit4'),
+  t('achievements.kubestronaut.benefit5'),
+];
+---
+
+<Layout
+  title={t('achievements.kubestronaut.title')}
+  description={t('meta.kubestronaut')}
+  lang={lang}
+  showSidebar={true}
+>
+  <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-8 2xl:px-12 3xl:px-16 py-6 sm:py-8">
+    <!-- Hero Section - Refactored Component -->
+    <AchievementHero
+      title={t('achievements.kubestronaut.title')}
+      description={t('achievements.kubestronaut.description')}
+      iconSrc={getAssetPath('/kubestronaut-icon.svg')}
+      certCount={5}
+      certCountLabel={t('certifications.card.certifications')}
+      certRequiredLabel={t('certifications.card.required')}
+      gradientClass="bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 dark:from-blue-900 dark:via-blue-800 dark:to-blue-900"
+      particleStyle="cosmic"
+      ctaText={t('achievements.kubestronaut.heroCta')}
+      ctaHref={`${basePath}/certifications/kcna`}
+      secondaryCtaText={t('achievements.kubestronaut.heroCtaSecondary')}
+      secondaryCtaHref="https://www.cncf.io/training/kubestronaut/"
+    />
+
+    <!-- Certification Path -->
+    <div class="mb-6 sm:mb-8">
+      <h2 class="text-xl sm:text-2xl font-bold mb-4 text-neutral-800 dark:text-neutral-100">
+        {t('achievements.kubestronaut.requiredCerts')}
+      </h2>
+
+      <AchievementCertificationGrid
+        certIds={kubestronautCerts}
+        certifications={CERTIFICATIONS}
+        basePath={basePath}
+        lang={lang}
+        aria-label={t('achievements.kubestronaut.requiredCerts')}
+        variant="kubestronaut"
+      />
+    </div>
+
+    <!-- Info Cards - Requirements & Benefits -->
+    <AchievementInfoCards
+      requirementsTitle={t('achievements.kubestronaut.requirements')}
+      requirements={requirements}
+      benefitsTitle={t('achievements.kubestronaut.benefits')}
+      benefits={benefits}
+    />
+
+    <!-- How to Get Started - Refactored Component -->
+    <AchievementSteps title={t('achievements.kubestronaut.how')} steps={steps} />
+
+    <!-- Call to Action - Refactored Component -->
+    <AchievementCTA
+      text={t('achievements.kubestronaut.ctaText')}
+      buttonText={t('achievements.kubestronaut.ctaButton')}
+      href={`${basePath}/certifications/${kubestronautCerts[0]}`}
+    />
+  </div>
+</Layout>

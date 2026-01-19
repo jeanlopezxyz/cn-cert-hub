@@ -1,0 +1,553 @@
+---
+/**
+ * NewsGrid Component
+ * Blog-style news section with sidebar filters
+ */
+import { getLangFromUrl, useTranslations, type Language } from '@/i18n/utils';
+import { fetchAllNews, getFallbackNewsData } from '@/data/news';
+import FeaturedNewsCard from './FeaturedNewsCard.astro';
+import NewsCard from './NewsCard.astro';
+import { GRIDS, TOUCH_TARGET } from '@/app';
+import { NEWS_ICONS, getCategoryIconName, buildLocalizedPath } from '@/utils';
+import { LOAD_MORE_DEFAULTS } from '@/constants/quiz';
+import Icon from '@/components/ui/Icon.astro';
+import CardSection from '@/components/ui/CardSection.astro';
+
+interface Props {
+  lang?: Language;
+}
+
+const { lang: propLang } = Astro.props;
+const lang = propLang || getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Fetch news at build time
+let newsData;
+try {
+  newsData = await fetchAllNews();
+} catch {
+  // Silent fallback - RSS fetch errors are expected
+  newsData = getFallbackNewsData();
+}
+
+// Configuration
+const { initialVisible: INITIAL_VISIBLE, loadMoreCount: LOAD_MORE_COUNT } = LOAD_MORE_DEFAULTS;
+
+// Separate featured and rest
+const featuredNews = newsData.items[0];
+const restNews = newsData.items.slice(1);
+
+// Count by category (single pass)
+const categoryCounts = restNews.reduce(
+  (acc, n) => {
+    acc[n.category]++;
+    return acc;
+  },
+  { all: restNews.length, certifications: 0, scholarships: 0, events: 0, announcements: 0 }
+);
+
+// Filter definitions (colors match centralized getFilterColorsForClient)
+const filters = [
+  { value: 'all', label: t('news.filter.all'), color: 'neutral' },
+  { value: 'certifications', label: t('news.filter.certifications'), color: 'teal' },
+  { value: 'scholarships', label: t('news.filter.scholarships'), color: 'amber' },
+  { value: 'events', label: t('news.filter.events'), color: 'indigo' },
+  { value: 'announcements', label: t('news.filter.announcements'), color: 'purple' },
+];
+
+// Category icons using centralized icon paths (for client-side JS mobile dropdown)
+const categoryIcons: Record<string, string> = {
+  all: NEWS_ICONS.newspaper,
+  certifications: NEWS_ICONS.certification,
+  scholarships: NEWS_ICONS.scholarship,
+  events: NEWS_ICONS.calendar,
+  announcements: NEWS_ICONS.announcement,
+};
+---
+
+<section class="pb-12 sm:pb-16">
+  <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-8 2xl:px-12 3xl:px-16">
+    <!-- Screen reader only H1 for accessibility -->
+    <h1 class="sr-only">{t('news.title')}</h1>
+
+    {
+      newsData.errors.length > 0 && newsData.items.length === 0 && (
+        <CardSection class="text-center">
+          <div class="w-12 h-12 mx-auto mb-4 text-amber-500">
+            <Icon name="warning" size="xl" strokeWidth={1.5} />
+          </div>
+          <p class="text-amber-700 dark:text-amber-300 mb-2 font-medium">{t('news.fetchError')}</p>
+        </CardSection>
+      )
+    }
+
+    {
+      newsData.items.length > 0 && (
+        <div
+          id="news-container"
+          data-total={restNews.length}
+          data-initial={INITIAL_VISIBLE}
+          data-load-more={LOAD_MORE_COUNT}
+        >
+          <div class="lg:hidden mb-6">
+            <div class="flex items-center gap-3">
+              <div class="relative flex-1" id="mobile-dropdown-container">
+                <button
+                  type="button"
+                  id="mobile-dropdown-btn"
+                  class="w-full flex items-center justify-between gap-3 px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-sm font-medium text-white hover:bg-neutral-700 transition-colors"
+                >
+                  <span class="flex items-center gap-3">
+                    <span id="mobile-dropdown-icon">
+                      <Icon name="newspaper" size="lg" class="text-neutral-400" strokeWidth={1.5} />
+                    </span>
+                    <span id="mobile-dropdown-label">{filters[0]?.label ?? 'All'}</span>
+                    <span
+                      class="text-xs px-2 py-0.5 rounded-full bg-neutral-600 text-neutral-300"
+                      id="mobile-dropdown-count"
+                    >
+                      {categoryCounts.all}
+                    </span>
+                  </span>
+                  <span id="mobile-dropdown-arrow" class="transition-transform">
+                    <Icon name="chevronDown" size="lg" class="text-neutral-400" strokeWidth={2} />
+                  </span>
+                </button>
+
+                <div
+                  id="mobile-dropdown-panel"
+                  class="hidden absolute z-50 w-full mt-2 py-2 bg-neutral-800 border border-neutral-700 rounded-xl shadow-xl shadow-black/20 overflow-hidden"
+                >
+                  {filters.map((filter, idx) => (
+                    <button
+                      type="button"
+                      data-filter={filter.value}
+                      data-color={filter.color}
+                      data-label={filter.label}
+                      data-icon={categoryIcons[filter.value]}
+                      data-count={categoryCounts[filter.value as keyof typeof categoryCounts]}
+                      class={`mobile-dropdown-option w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors ${
+                        idx === 0
+                          ? 'bg-neutral-700 text-white'
+                          : 'text-neutral-300 hover:bg-neutral-700/50 hover:text-white'
+                      }`}
+                    >
+                      <span class="flex items-center gap-3">
+                        <Icon
+                          name={getCategoryIconName(filter.value)}
+                          size="lg"
+                          class="text-neutral-400"
+                          strokeWidth={1.5}
+                        />
+                        {filter.label}
+                      </span>
+                      <span
+                        class={`text-xs px-2 py-0.5 rounded-full ${
+                          idx === 0
+                            ? 'bg-neutral-600 text-white'
+                            : 'bg-neutral-700 text-neutral-400'
+                        }`}
+                      >
+                        {categoryCounts[filter.value as keyof typeof categoryCounts]}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <a
+                href={buildLocalizedPath('/news/archives', lang)}
+                class="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 bg-neutral-800 border border-neutral-700 rounded-xl text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors"
+                title={t('news.archives')}
+              >
+                <Icon name="archive" size="md" strokeWidth={2} />
+              </a>
+            </div>
+          </div>
+
+          <div class="flex flex-col lg:flex-row gap-6">
+            <div class="flex-1 min-w-0">
+              {featuredNews && (
+                <div class="mb-6" id="featured-section">
+                  <FeaturedNewsCard item={featuredNews} lang={lang} />
+                </div>
+              )}
+
+              <div id="news-grid" class={`${GRIDS.cards.responsive} ${GRIDS.gap.md}`}>
+                {restNews.map((item, index) => (
+                  <div
+                    class={`news-item ${index >= INITIAL_VISIBLE ? 'hidden' : ''}`}
+                    data-index={index}
+                    data-category={item.category}
+                  >
+                    <NewsCard item={item} lang={lang} index={index} />
+                  </div>
+                ))}
+              </div>
+
+              <div
+                id="no-results"
+                class="hidden p-8 rounded-xl bg-neutral-50 dark:bg-neutral-700/30 text-center mt-6"
+              >
+                <div class="w-12 h-12 mx-auto mb-4 text-neutral-400">
+                  <Icon name="search" size="xl" strokeWidth={1.5} />
+                </div>
+                <p class="text-neutral-600 dark:text-neutral-400">{t('news.noResults')}</p>
+              </div>
+
+              {restNews.length > INITIAL_VISIBLE && (
+                <div class="mt-8 text-center" id="load-more-container">
+                  <button
+                    type="button"
+                    id="load-more-btn"
+                    class={`inline-flex items-center gap-2 px-6 py-3 ${TOUCH_TARGET.min} rounded-xl bg-neutral-200 dark:bg-neutral-700/60 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-300 dark:hover:bg-neutral-600/60 font-medium transition-all`}
+                  >
+                    {t('news.loadMore')}
+                    <span class="text-sm text-neutral-500 dark:text-neutral-400">
+                      (<span id="remaining-count">{restNews.length - INITIAL_VISIBLE}</span>)
+                    </span>
+                    <Icon name="chevronDown" size="sm" strokeWidth={2} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <aside class="hidden lg:block lg:w-72 xl:w-80 flex-shrink-0">
+              <div class="lg:sticky lg:top-6 space-y-6">
+                <CardSection aria-label={t('news.categories')}>
+                  <h3 class="text-lg font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Icon name="filter" size="md" strokeWidth={2} />
+                    {t('news.categories')}
+                  </h3>
+                  <nav class="space-y-1" id="news-filters">
+                    {filters.map((filter, idx) => (
+                      <button
+                        type="button"
+                        data-filter={filter.value}
+                        data-color={filter.color}
+                        class={`news-filter-btn w-full flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-all ${
+                          idx === 0
+                            ? 'bg-neutral-700 dark:bg-neutral-600 text-white'
+                            : 'bg-neutral-100 dark:bg-neutral-700/40 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700/60'
+                        }`}
+                      >
+                        <span class="flex items-center gap-3">
+                          <Icon
+                            name={getCategoryIconName(filter.value)}
+                            size="md"
+                            strokeWidth={1.5}
+                          />
+                          {filter.label}
+                        </span>
+                        <span
+                          class={`text-sm px-2 py-0.5 rounded-full ${
+                            idx === 0
+                              ? 'bg-white/20 text-white'
+                              : 'bg-neutral-200 dark:bg-neutral-600 text-neutral-600 dark:text-neutral-300'
+                          }`}
+                        >
+                          {categoryCounts[filter.value as keyof typeof categoryCounts]}
+                        </span>
+                      </button>
+                    ))}
+                  </nav>
+                </CardSection>
+
+                <CardSection aria-label={t('news.archives')}>
+                  <h3 class="text-lg font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Icon name="archive" size="md" strokeWidth={2} />
+                    {t('news.archives')}
+                  </h3>
+                  <a
+                    href={buildLocalizedPath('/news/archives', lang)}
+                    class="flex items-center justify-between px-4 py-3 rounded-xl bg-neutral-100 dark:bg-neutral-700/40 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition-all group"
+                  >
+                    <span class="font-medium">{t('news.viewAllArchives')}</span>
+                    <span class="group-hover:translate-x-1 transition-transform">
+                      <Icon name="arrowRight" size="md" strokeWidth={2} />
+                    </span>
+                  </a>
+                </CardSection>
+
+                <CardSection class="text-center">
+                  <div
+                    class="text-3xl font-bold text-neutral-900 dark:text-white"
+                    id="visible-count"
+                  >
+                    {Math.min(INITIAL_VISIBLE, restNews.length)}
+                  </div>
+                  <div class="text-sm text-neutral-500 dark:text-neutral-400">
+                    {t('news.of')}{' '}
+                    <span
+                      id="total-count"
+                      class="font-semibold text-neutral-700 dark:text-neutral-300"
+                    >
+                      {restNews.length}
+                    </span>{' '}
+                    {t('news.articles')}
+                  </div>
+                </CardSection>
+
+                <div class="text-xs text-neutral-400 dark:text-neutral-500 text-center">
+                  {t('news.lastUpdated')}:{' '}
+                  <span id="last-updated-date" data-timestamp={newsData.fetchedAt.toISOString()} />
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<script>
+  import { getFilterColorsForClient, addClasses, removeClasses } from '@/utils';
+  import { onPageReady } from '@/scripts';
+  import { STAGGER_DELAY } from '@/app';
+
+  function initNewsSection() {
+    // Format last updated date using user's system locale
+    const lastUpdatedEl = document.getElementById('last-updated-date');
+    if (lastUpdatedEl?.dataset.timestamp) {
+      const date = new Date(lastUpdatedEl.dataset.timestamp);
+      lastUpdatedEl.textContent = new Intl.DateTimeFormat(undefined, {
+        dateStyle: 'medium',
+      }).format(date);
+    }
+
+    const container = document.getElementById('news-container');
+    if (!container) return;
+
+    const initialVisible = parseInt(container.dataset.initial || '9');
+    const loadMoreCount = parseInt(container.dataset.loadMore || '6');
+
+    // Desktop filter buttons and mobile custom dropdown
+    const desktopButtons = document.querySelectorAll('.news-filter-btn');
+    const mobileDropdownBtn = document.getElementById('mobile-dropdown-btn');
+    const mobileDropdownPanel = document.getElementById('mobile-dropdown-panel');
+    const mobileDropdownLabel = document.getElementById('mobile-dropdown-label');
+    const mobileDropdownCount = document.getElementById('mobile-dropdown-count');
+    const mobileDropdownArrow = document.getElementById('mobile-dropdown-arrow');
+    const mobileDropdownOptions = document.querySelectorAll('.mobile-dropdown-option');
+    const mobileDropdownBtnIcon = mobileDropdownBtn?.querySelector('svg path');
+
+    const items = document.querySelectorAll('.news-item');
+    const featuredSection = document.getElementById('featured-section');
+    const noResults = document.getElementById('no-results');
+    const loadMoreContainer = document.getElementById('load-more-container');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const visibleCountEl = document.getElementById('visible-count');
+    const totalCountEl = document.getElementById('total-count');
+    const remainingCountEl = document.getElementById('remaining-count');
+
+    let currentFilter = 'all';
+    let currentVisibleCount = initialVisible;
+
+    // Color mapping for active states - using centralized utility
+    const filterColors = getFilterColorsForClient();
+
+    function getFilteredItems() {
+      return Array.from(items).filter((item) => {
+        const category = item.getAttribute('data-category');
+        return currentFilter === 'all' || category === currentFilter;
+      });
+    }
+
+    function updateDesktopButtonStyles() {
+      desktopButtons.forEach((btn) => {
+        const btnFilter = btn.getAttribute('data-filter');
+        const color = btn.getAttribute('data-color') || 'neutral';
+        const defaultColors = {
+          active: 'bg-neutral-700 dark:bg-neutral-600 text-white',
+          inactive: 'bg-neutral-100 dark:bg-neutral-700/40 text-neutral-600 dark:text-neutral-300',
+        };
+        const colors = filterColors[color] ?? defaultColors;
+        const countSpan = btn.querySelector('span:last-child');
+
+        // Remove all color classes
+        Object.values(filterColors).forEach((c) => {
+          removeClasses(btn as HTMLElement, c.active);
+          removeClasses(btn as HTMLElement, c.inactive);
+        });
+
+        // Add appropriate classes
+        if (btnFilter === currentFilter) {
+          addClasses(btn as HTMLElement, colors.active);
+          if (countSpan) {
+            countSpan.className = 'text-sm px-2 py-0.5 rounded-full bg-white/20 text-white';
+          }
+        } else {
+          addClasses(btn as HTMLElement, colors.inactive);
+          if (countSpan) {
+            countSpan.className =
+              'text-sm px-2 py-0.5 rounded-full bg-neutral-200 dark:bg-neutral-600 text-neutral-600 dark:text-neutral-300';
+          }
+        }
+      });
+    }
+
+    function updateDisplay() {
+      const filtered = getFilteredItems();
+      const totalFiltered = filtered.length;
+
+      // Update desktop button styles
+      updateDesktopButtonStyles();
+
+      // Sync mobile dropdown with current filter
+      if (mobileDropdownOptions) {
+        mobileDropdownOptions.forEach((opt) => {
+          const optFilter = opt.getAttribute('data-filter');
+          const countSpan = opt.querySelector('span:last-child');
+
+          if (optFilter === currentFilter) {
+            opt.classList.add('bg-neutral-700', 'text-white');
+            opt.classList.remove('text-neutral-300', 'hover:bg-neutral-700/50');
+            if (countSpan) {
+              countSpan.className = 'text-xs px-2 py-0.5 rounded-full bg-neutral-600 text-white';
+            }
+            // Update button label
+            if (mobileDropdownLabel) {
+              mobileDropdownLabel.textContent = opt.getAttribute('data-label') || '';
+            }
+            if (mobileDropdownCount) {
+              mobileDropdownCount.textContent = opt.getAttribute('data-count') || '';
+            }
+            if (mobileDropdownBtnIcon) {
+              mobileDropdownBtnIcon.setAttribute('d', opt.getAttribute('data-icon') || '');
+            }
+          } else {
+            opt.classList.remove('bg-neutral-700', 'text-white');
+            opt.classList.add('text-neutral-300', 'hover:bg-neutral-700/50');
+            if (countSpan) {
+              countSpan.className =
+                'text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-400';
+            }
+          }
+        });
+      }
+
+      // Show/hide featured based on filter
+      if (featuredSection) {
+        featuredSection.style.display = currentFilter === 'all' ? 'block' : 'none';
+      }
+
+      // Show/hide items with animation
+      let delay = 0;
+      items.forEach((item) => {
+        const category = item.getAttribute('data-category');
+        const matchesFilter = currentFilter === 'all' || category === currentFilter;
+        const index = filtered.indexOf(item as Element);
+        const shouldShow = matchesFilter && index < currentVisibleCount;
+        const isCurrentlyHidden = item.classList.contains('hidden');
+
+        if (shouldShow && isCurrentlyHidden) {
+          // Show with staggered animation
+          item.classList.remove('hidden');
+          item.classList.add('fade-in');
+          (item as HTMLElement).style.animationDelay = `${delay * STAGGER_DELAY.MEDIUM}ms`;
+          delay++;
+          setTimeout(() => item.classList.remove('fade-in'), 300);
+        } else if (!shouldShow && !isCurrentlyHidden) {
+          // Hide
+          item.classList.add('hidden');
+        }
+      });
+
+      // Update counters
+      const visibleNow = Math.min(currentVisibleCount, totalFiltered);
+      if (visibleCountEl) visibleCountEl.textContent = String(visibleNow);
+      if (totalCountEl) totalCountEl.textContent = String(totalFiltered);
+
+      const remaining = totalFiltered - visibleNow;
+      if (remainingCountEl) remainingCountEl.textContent = String(remaining);
+
+      // Show/hide load more button
+      if (loadMoreContainer) {
+        loadMoreContainer.style.display = remaining > 0 ? 'block' : 'none';
+      }
+
+      // Show/hide no results
+      if (noResults) {
+        noResults.classList.toggle('hidden', totalFiltered > 0);
+      }
+    }
+
+    // Desktop filter button handlers
+    desktopButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const filter = btn.getAttribute('data-filter');
+        if (filter) {
+          currentFilter = filter;
+          currentVisibleCount = initialVisible;
+          updateDisplay();
+        }
+      });
+    });
+
+    // Mobile custom dropdown handlers
+    let dropdownOpen = false;
+
+    function toggleDropdown() {
+      dropdownOpen = !dropdownOpen;
+      if (mobileDropdownPanel) {
+        mobileDropdownPanel.classList.toggle('hidden', !dropdownOpen);
+      }
+      if (mobileDropdownArrow) {
+        mobileDropdownArrow.style.transform = dropdownOpen ? 'rotate(180deg)' : '';
+      }
+    }
+
+    function closeDropdown() {
+      dropdownOpen = false;
+      if (mobileDropdownPanel) {
+        mobileDropdownPanel.classList.add('hidden');
+      }
+      if (mobileDropdownArrow) {
+        mobileDropdownArrow.style.transform = '';
+      }
+    }
+
+    if (mobileDropdownBtn) {
+      mobileDropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleDropdown();
+      });
+    }
+
+    // Option selection
+    mobileDropdownOptions.forEach((opt) => {
+      opt.addEventListener('click', () => {
+        const filter = opt.getAttribute('data-filter');
+        if (filter) {
+          currentFilter = filter;
+          currentVisibleCount = initialVisible;
+          closeDropdown();
+          updateDisplay();
+        }
+      });
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const container = document.getElementById('mobile-dropdown-container');
+      if (container && !container.contains(e.target as Node)) {
+        closeDropdown();
+      }
+    });
+
+    // Load more handler
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener('click', () => {
+        currentVisibleCount += loadMoreCount;
+        updateDisplay();
+      });
+    }
+
+    // Initial display
+    updateDisplay();
+  }
+
+  // Initialize on load and after navigation
+  onPageReady(initNewsSection);
+</script>

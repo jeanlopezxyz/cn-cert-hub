@@ -1,0 +1,90 @@
+{
+  "name": "cn-cert-hub",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Cloud Native Certification Resources Hub - A comprehensive platform for tracking cloud native certifications and study progress",
+  "keywords": [
+    "cloud-native",
+    "kubernetes",
+    "certification",
+    "study-guide",
+    "astro",
+    "typescript"
+  ],
+  "author": "CNCertHub Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jeanlopezxyz/cn-cert-hub.git"
+  },
+  "homepage": "https://cnativecerthub.xyz",
+  "bugs": {
+    "url": "https://github.com/jeanlopezxyz/cn-cert-hub/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "npm run sync-i18n && astro build && node scripts/optimize-build.cjs",
+    "preview": "astro preview",
+    "clean": "rm -rf dist .astro",
+    "sync-i18n": "node scripts/sync-i18n-pages.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,css,md,astro}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,css,md,astro}\"",
+    "typecheck": "astro check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "validate": "npm run typecheck && npm run lint && npm run format:check",
+    "validate:data": "npx tsx scripts/validate-data.ts",
+    "prepare-pr": "npm run validate && npm run validate:data && npm run test && npm run build",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@astrojs/tailwind": "^6.0.2",
+    "@iconify-json/heroicons": "^1.2.3",
+    "@iconify-json/simple-icons": "^1.2.67",
+    "astro": "^5.16.11",
+    "astro-icon": "^1.1.5",
+    "autoprefixer": "^10.4.23",
+    "html2canvas": "^1.4.1",
+    "postcss": "^8.4.24",
+    "tailwindcss": "^3.4.0",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.6",
+    "@astrojs/sitemap": "^3.7.0",
+    "@eslint/js": "^9.39.2",
+    "@playwright/test": "^1.57.0",
+    "eslint": "^9.39.2",
+    "husky": "^9.1.7",
+    "jsdom": "^27.4.0",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.0",
+    "prettier-plugin-astro": "^0.14.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.53.1",
+    "vitest": "^4.0.17"
+  },
+  "overrides": {
+    "tailwindcss": "^3.4.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,md,json}": [
+      "prettier --write"
+    ],
+    "*.astro": [
+      "prettier --write --plugin=prettier-plugin-astro"
+    ]
+  }
+}

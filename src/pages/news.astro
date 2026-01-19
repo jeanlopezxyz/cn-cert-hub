@@ -1,0 +1,13 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import NewsGrid from '@/components/news/NewsGrid.astro';
+import { getPageI18n } from '@/i18n';
+
+const { lang, t } = getPageI18n(Astro.url);
+---
+
+<Layout title={t('news.title')} description={t('meta.news')} lang={lang} showSidebar={true}>
+  <div class="py-6 sm:py-8">
+    <NewsGrid lang={lang} />
+  </div>
+</Layout>

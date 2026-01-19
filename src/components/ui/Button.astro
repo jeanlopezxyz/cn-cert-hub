@@ -1,0 +1,100 @@
+---
+/**
+ * Button Component
+ * Reusable button component supporting multiple variants and sizes.
+ * Renders as <a> when href is provided, otherwise as <button>.
+ *
+ * Accessibility:
+ *   - Ensure buttons have descriptive text or aria-label
+ *   - Icon-only buttons should have aria-label on the button element
+ *   - External links automatically get rel="noopener noreferrer" for security
+ */
+
+interface Props {
+  /** Visual variant of the button */
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  /** Size of the button */
+  size?: 'sm' | 'md' | 'lg';
+  /** If provided, renders as link */
+  href?: string;
+  /** Enable scale animation on hover */
+  withScale?: boolean;
+  /** Additional CSS classes */
+  class?: string;
+  /** Button type (only applies to button element) */
+  type?: 'button' | 'submit' | 'reset';
+  /** Target for links */
+  target?: string;
+  /** Rel attribute for links (defaults to "noopener noreferrer" for external links) */
+  rel?: string;
+  [key: string]: any;
+}
+
+const {
+  variant = 'primary',
+  size = 'md',
+  href,
+  withScale = false,
+  class: additionalClasses = '',
+  type = 'button',
+  target,
+  rel,
+  ...restProps
+} = Astro.props;
+
+// Base classes applied to all buttons
+const baseClasses =
+  'inline-flex items-center justify-center font-medium transition-all duration-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+
+// Variant-specific classes (no shadow/shine for cleaner look)
+const variantClasses: Record<string, string> = {
+  primary: 'bg-primary-600 hover:bg-primary-700 text-white focus:ring-primary-500',
+  secondary:
+    'bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700 focus:ring-neutral-500',
+  outline:
+    'border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:ring-neutral-500',
+  ghost:
+    'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:ring-neutral-500',
+};
+
+// Size-specific classes
+const sizeClasses: Record<string, string> = {
+  sm: 'px-3 py-1.5 text-sm gap-1.5',
+  md: 'px-6 py-3 text-base gap-2',
+  lg: 'px-8 py-4 text-lg gap-3',
+};
+
+// Scale animation class
+const scaleClass = withScale ? 'hover:scale-105' : '';
+
+// Combine all classes
+const combinedClasses = [
+  baseClasses,
+  variantClasses[variant],
+  sizeClasses[size],
+  scaleClass,
+  additionalClasses,
+]
+  .filter(Boolean)
+  .join(' ');
+
+// Render as link or button
+const Element = href ? 'a' : 'button';
+
+// Props for the rendered element
+const elementProps = href
+  ? {
+      href,
+      target,
+      rel: target === '_blank' ? rel || 'noopener noreferrer' : rel,
+      ...restProps,
+    }
+  : {
+      type,
+      ...restProps,
+    };
+---
+
+<Element class={combinedClasses} {...elementProps}>
+  <slot />
+</Element>
