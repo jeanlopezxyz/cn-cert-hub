@@ -60,17 +60,17 @@
     "@astrojs/check": "^0.9.6",
     "@astrojs/sitemap": "^3.7.0",
     "@eslint/js": "^9.39.2",
-    "@playwright/test": "^1.57.0",
+    "@playwright/test": "^1.58.0",
     "eslint": "^9.39.2",
     "husky": "^9.1.7",
     "jsdom": "^27.4.0",
     "lint-staged": "^16.2.7",
-    "prettier": "^3.8.0",
+    "prettier": "^3.8.1",
     "prettier-plugin-astro": "^0.14.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.53.1",
-    "vitest": "^4.0.17"
+    "vitest": "^4.0.18"
   },
   "overrides": {
     "tailwindcss": "^3.4.0"
